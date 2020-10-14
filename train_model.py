@@ -41,6 +41,7 @@ def create_model_data(name):
     :return:
     """
     data = transform_data(name)
+    print(data[0])
     x_data = data[:, 0:3].reshape([-1, 3, 1])
     y_data = data[:, 3:].ravel()
     return x_data, y_data

@@ -18,3 +18,20 @@ BOLL_NAME = [
 ]
 
 train_data_path = "data/data.csv"
+
+BALL_ENUM = None
+
+
+def init():
+    global BALL_ENUM
+    if BALL_ENUM is not None:
+        return
+    BALL_ENUM = []
+    for ball_type in ['红', '蓝']:
+        for ball_num in range(1, 34):
+            if ball_type == '蓝' and ball_num > 16:
+                break
+            BALL_ENUM.append((ball_type, ball_num))
+
+
+init()
