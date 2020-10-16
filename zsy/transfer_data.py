@@ -1,13 +1,11 @@
 import pandas as pd
-import numpy as np
 from config import *
-from collections import OrderedDict, defaultdict
 
 DATA = pd.read_csv("../" + train_data_path)
 if not len(DATA):
     raise Exception("请执行 get_train_data.py 进行数据下载！")
 
-CONVERT = pd.read_csv("../data/convert.csv",)
+CONVERT = pd.read_csv("../data/convert.csv")
 
 
 # 计算全量每一期次数、遗漏值等
@@ -22,14 +20,15 @@ def construct_model(data_balls):
         for ball in BALL_ENUM:
             ball_key = ball[0] + '_' + str(ball[1])
             is_exist = cal_ball_exist(data_balls, issue, ball[1], ball[0])
-            result[ball_key+'_exist'] = 1 if is_exist else 0
-            for recent_count in [10, 30, 50, 100]:
-                result[ball_key+'_总次数_' + str(recent_count)] = cal_total_count(data_balls, recent_count, ball[1], ball[0], issue)
+            result[ball_key + '_exist'] = 1 if is_exist else 0
+            for recent_count in RECENT_COUNTS:
+                result[ball_key + '_总次数_' + str(recent_count)] = cal_total_count(data_balls, recent_count, ball[1],
+                                                                                 ball[0], issue)
                 missing_dict = cal_missing(data_balls, recent_count, ball[1], ball[0], issue)
-                result[ball_key+'_平均遗漏值_' + str(recent_count)] = missing_dict['平均遗漏值']
-                result[ball_key+'_最大遗漏值_' + str(recent_count)] = missing_dict['最大遗漏值']
-                result[ball_key+'_本次遗漏_' + str(recent_count)] = missing_dict['本次遗漏']
-                result[ball_key+'_上次遗漏_' + str(recent_count)] = missing_dict['上次遗漏']
+                result[ball_key + '_平均遗漏值_' + str(recent_count)] = missing_dict['平均遗漏值']
+                result[ball_key + '_最大遗漏值_' + str(recent_count)] = missing_dict['最大遗漏值']
+                result[ball_key + '_本次遗漏_' + str(recent_count)] = missing_dict['本次遗漏']
+                result[ball_key + '_上次遗漏_' + str(recent_count)] = missing_dict['上次遗漏']
         results.append(result)
     return results
 
@@ -143,4 +142,4 @@ if __name__ == '__main__':
 
     model = construct_model(data_ball_list)
     # [{"期数":20097,"红_1":{"exist":0, 遗漏值等...}}]
-    pd.DataFrame(model).to_csv('../data/convert.csv', index=False)
+    pd.DataFrame(model).sort_values('期数', axis=0, ascending=False).to_csv('../data/convert.csv', index=False)
