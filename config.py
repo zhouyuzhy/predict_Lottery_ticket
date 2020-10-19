@@ -4,6 +4,7 @@
 # @Site    : 
 # @File    : config.py
 import pandas as pd
+import os.path
 
 URL = "https://datachart.500.com/ssq/history/"
 path = "newinc/history.php?start={}&end="
@@ -50,4 +51,7 @@ def init():
 
 
 init()
-CONVERT = pd.read_csv("../data/convert.csv")
+if os.path.isfile('../data/convert.csv'):
+    CONVERT = pd.read_csv("../data/convert.csv")
+else:
+    CONVERT = None

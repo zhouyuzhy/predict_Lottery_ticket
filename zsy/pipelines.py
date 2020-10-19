@@ -45,7 +45,8 @@ if __name__ == '__main__':
     # 处理原始数据,用前一期的X和本期的Y作为关联预测维度
     data, newest_X = process_data(CONVERT)
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-    predict_results = []
+    predict_red_results = []
+    predict_blue_results = []
     for ball in config.BALL_ENUM:
         # for ball in [('红', 1)]:
         # 训练
@@ -72,5 +73,10 @@ if __name__ == '__main__':
         # 组装下一期X并预测
         predictions = lin_reg.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
         print(key, ':', predictions)
-        predict_results.append((key, predictions[0]))
-    print(sorted(predict_results, key=itemgetter(1), reverse=True))
+        if '红' in key:
+            predict_red_results.append((key, predictions[0]))
+        if '蓝' in key:
+            predict_blue_results.append((key, predictions[0]))
+    print(sorted(predict_red_results, key=itemgetter(1), reverse=True))
+    print(sorted(predict_blue_results, key=itemgetter(1), reverse=True))
+
