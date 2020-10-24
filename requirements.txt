@@ -7,3 +7,5 @@ lxml
 matplotlib
 scipy
 sklearn
+beautifulsoup4
+lxml

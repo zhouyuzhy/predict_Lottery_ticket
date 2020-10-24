@@ -9,6 +9,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 import pandas as pd
 from operator import itemgetter
+from sklearn.linear_model import SGDClassifier
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -53,14 +54,19 @@ if __name__ == '__main__':
         key = ball[0] + '_' + str(ball[1])
         pipeline = Pipeline([
             ('selector', DataFrameSelector([config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key])),
-            ('std_scaler', StandardScaler())
+            ('std_scaler', StandardScaler()),
+            ('lin_reg', LinearRegression())
         ])
-        prepared = pipeline.fit_transform(train_set)
-        lin_reg = LinearRegression()
-        lin_reg.fit(prepared, train_set[Y_ATTRIBUTES[key]].values)
+        # prepared = pipeline.fit_transform(train_set)
+        # lin_reg = LinearRegression()
+        pipeline.fit(train_set, train_set[Y_ATTRIBUTES[key]].values)
+
+        # sgd_clf = SGDClassifier(random_state=42)
+        # sgd_clf.fit(prepared, train_set[Y_ATTRIBUTES[key]].values)
 
         # test预测
-        predictions = lin_reg.predict(pipeline.fit_transform(test_set))
+        predictions = pipeline.predict(test_set)
+        # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
         # print(key, "predictions: ", predictions)
         targets = test_set[Y_ATTRIBUTES[key]]
         # print(key, "labels: ", list(targets))
@@ -71,7 +77,9 @@ if __name__ == '__main__':
         # print(line_rmse)
 
         # 组装下一期X并预测
-        predictions = lin_reg.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
+        predictions = pipeline.predict(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]])
+        # predictions = sgd_clf.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
+
         print(key, ':', predictions)
         if '红' in key:
             predict_red_results.append((key, predictions[0]))
