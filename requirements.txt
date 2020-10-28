@@ -9,3 +9,4 @@ scipy
 sklearn
 beautifulsoup4
 lxml
+futu-api

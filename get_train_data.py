@@ -54,12 +54,12 @@ def spider(start, end, mode):
 
     if mode == "train":
         df = pd.DataFrame(data)
-        df.to_csv("data/data.csv", encoding="utf-8")
+        df.to_csv("../data/data.csv", encoding="utf-8")
     elif mode == "predict":
         return pd.DataFrame(data)
 
 
-if __name__ == "__main__":
+def fetch_train_data():
     print("最新一期期号：{}".format(get_current_number()))
     print("正在获取数据。。。")
     spider(1, get_current_number(), "train")

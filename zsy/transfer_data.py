@@ -137,7 +137,7 @@ def transfer_data_balls():
     return data_balls
 
 
-if __name__ == '__main__':
+def trans_data():
     data_ball_list = transfer_data_balls()
 
     model = construct_model(data_ball_list)

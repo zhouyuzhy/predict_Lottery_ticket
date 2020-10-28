@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from operator import itemgetter
 from sklearn.linear_model import SGDClassifier
+import get_train_data
+import zsy.transfer_data
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -43,48 +45,56 @@ def process_data(converted_data):
 
 
 if __name__ == '__main__':
+    get_train_data.fetch_train_data()
+    zsy.transfer_data.trans_data()
     # 处理原始数据,用前一期的X和本期的Y作为关联预测维度
     data, newest_X = process_data(CONVERT)
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-    predict_red_results = []
-    predict_blue_results = []
-    for ball in config.BALL_ENUM:
-        # for ball in [('红', 1)]:
-        # 训练
-        key = ball[0] + '_' + str(ball[1])
-        pipeline = Pipeline([
-            ('selector', DataFrameSelector([config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key])),
-            ('std_scaler', StandardScaler()),
-            ('lin_reg', LinearRegression())
-        ])
-        # prepared = pipeline.fit_transform(train_set)
-        # lin_reg = LinearRegression()
-        pipeline.fit(train_set, train_set[Y_ATTRIBUTES[key]].values)
+    for ppl in [1, 2]:
+        predict_red_results = []
+        predict_blue_results = []
+        for ball in config.BALL_ENUM:
+            # for ball in [('红', 1)]:
+            # 训练
+            key = ball[0] + '_' + str(ball[1])
+            if ppl == 1:
+                pipeline = Pipeline([
+                    ('selector', DataFrameSelector([config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key])),
+                    # ('std_scaler', StandardScaler())
+                ])
+            elif ppl == 2:
+                pipeline = Pipeline([
+                    ('selector', DataFrameSelector([config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key])),
+                    ('std_scaler', StandardScaler())
+                ])
+            prepared = pipeline.fit_transform(train_set)
+            lin_reg = LinearRegression()
+            lin_reg.fit(prepared, train_set[Y_ATTRIBUTES[key]].values)
 
-        # sgd_clf = SGDClassifier(random_state=42)
-        # sgd_clf.fit(prepared, train_set[Y_ATTRIBUTES[key]].values)
+            # sgd_clf = SGDClassifier(random_state=42)
+            # sgd_clf.fit(prepared, train_set[Y_ATTRIBUTES[key]].values)
 
-        # test预测
-        predictions = pipeline.predict(test_set)
-        # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
-        # print(key, "predictions: ", predictions)
-        targets = test_set[Y_ATTRIBUTES[key]]
-        # print(key, "labels: ", list(targets))
+            # test预测
+            predictions = lin_reg.predict(pipeline.fit_transform(test_set))
+            # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
+            # print(key, "predictions: ", predictions)
+            targets = test_set[Y_ATTRIBUTES[key]]
+            # print(key, "labels: ", list(targets))
 
-        # test验证
-        line_mse = mean_squared_error(targets, predictions)
-        line_rmse = np.sqrt(line_mse)
-        # print(line_rmse)
+            # test验证
+            line_mse = mean_squared_error(targets, predictions)
+            line_rmse = np.sqrt(line_mse)
+            # print(line_rmse)
 
-        # 组装下一期X并预测
-        predictions = pipeline.predict(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]])
-        # predictions = sgd_clf.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
+            # 组装下一期X并预测
+            predictions = lin_reg.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
+            # predictions = sgd_clf.predict(pipeline.fit_transform(newest_X[[config.ATTRIBUTE_ISSUE] + X_ATTRIBUTES[key]]))
 
-        print(key, ':', predictions)
-        if '红' in key:
-            predict_red_results.append((key, predictions[0]))
-        if '蓝' in key:
-            predict_blue_results.append((key, predictions[0]))
-    print(sorted(predict_red_results, key=itemgetter(1), reverse=True))
-    print(sorted(predict_blue_results, key=itemgetter(1), reverse=True))
+            # print(key, ':', predictions)
+            if '红' in key:
+                predict_red_results.append((key, predictions[0]))
+            if '蓝' in key:
+                predict_blue_results.append((key, predictions[0]))
+        print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:6])
+        print(sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0])
 
