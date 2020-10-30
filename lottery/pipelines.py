@@ -11,7 +11,7 @@ import pandas as pd
 from operator import itemgetter
 from sklearn.linear_model import SGDClassifier
 import get_train_data
-import zsy.transfer_data
+import lottery.transfer_data
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -46,7 +46,7 @@ def process_data(converted_data):
 
 if __name__ == '__main__':
     get_train_data.fetch_train_data()
-    zsy.transfer_data.trans_data()
+    lottery.transfer_data.trans_data()
     # 处理原始数据,用前一期的X和本期的Y作为关联预测维度
     data, newest_X = process_data(CONVERT)
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
