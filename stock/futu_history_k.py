@@ -1,9 +1,11 @@
 from futu import *
 import pandas as pd
+from datetime import datetime
+
 
 STOCK_CODE = 'HK.800000'
 START_DATE = '2017-01-01'
-END_DATE = '2020-10-28'
+END_DATE = datetime.now().strftime('%Y-%m-%d')
 
 if __name__ == '__main__':
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)

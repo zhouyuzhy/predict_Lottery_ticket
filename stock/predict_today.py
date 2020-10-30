@@ -18,18 +18,18 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         X['week_day'] = X.apply(lambda x: datetime.strptime(x['time_key'], '%Y-%m-%d %H:%M:%S').weekday(), axis=1)
-        return X[self.attribute_names+['week_day']].values
+        return X[self.attribute_names + ['week_day']].values
 
 
 if __name__ == '__main__':
     data = pd.read_csv('HK800000.csv')
     newest = data.tail(1)
-    data = data.head(len(data)-1)
+    data = data.head(len(data) - 1)
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
     pipeline = Pipeline([
-            ('selector', DataFrameSelector(['open','high','low','turnover','change_rate','last_close'])),
-            ('std_scaler', StandardScaler())
-        ])
+        ('selector', DataFrameSelector(['open', 'high', 'low', 'last_close'])),
+        # ('std_scaler', StandardScaler())
+    ])
     prepared = pipeline.fit_transform(train_set)
     lin_reg = LinearRegression()
     lin_reg.fit(prepared, train_set['close'])
@@ -46,5 +46,9 @@ if __name__ == '__main__':
     print(line_rmse)
 
     # predict
+    data = pd.read_csv('HK.800000_TODAY_DAY_K.csv')
+    # newest = pd.DataFrame([{'time_key': '2020-10-29 00:00:00', 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
+    #                         'last_close': 24708.80}])
+    newest = data.tail(1)
     predict = lin_reg.predict(pipeline.fit_transform(newest))
     print(predict)

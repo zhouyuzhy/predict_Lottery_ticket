@@ -95,6 +95,6 @@ if __name__ == '__main__':
                 predict_red_results.append((key, predictions[0]))
             if '蓝' in key:
                 predict_blue_results.append((key, predictions[0]))
-        print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:6])
-        print(sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0])
+        print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:8])
+        print(sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0:3])
 
