@@ -12,6 +12,8 @@ from operator import itemgetter
 from sklearn.linear_model import SGDClassifier
 import get_train_data
 import lottery.transfer_data
+import os
+from random import randint
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -47,9 +49,15 @@ def process_data(converted_data):
 if __name__ == '__main__':
     get_train_data.fetch_train_data()
     lottery.transfer_data.trans_data()
+    if os.path.isfile('../data/convert.csv'):
+        CONVERT = pd.read_csv("../data/convert.csv")
+    else:
+        CONVERT = None
     # 处理原始数据,用前一期的X和本期的Y作为关联预测维度
     data, newest_X = process_data(CONVERT)
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
+    red_balls = set()
+    blue_balls = set()
     for ppl in [1, 2]:
         predict_red_results = []
         predict_blue_results = []
@@ -97,4 +105,23 @@ if __name__ == '__main__':
                 predict_blue_results.append((key, predictions[0]))
         print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:8])
         print(sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0:3])
-
+        for red_ball in sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:8]:
+            red_balls.add(int(red_ball[0].replace('红_', '')))
+        for blue_ball in sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0:3]:
+            blue_balls.add(int(blue_ball[0].replace('蓝_', '')))
+    red_balls = sorted(list(red_balls))
+    blue_balls = sorted(list(blue_balls))
+    print('red:', red_balls)
+    print('blue:', blue_balls)
+    n = 3
+    for num in range(n):
+        result = []
+        for x in range(6):
+            while True:
+                random_ball = red_balls[randint(0, len(red_balls) - 1)]
+                if random_ball not in result:
+                    result.append(random_ball)
+                    break
+        result = sorted(result)
+        result.append('蓝'+str(blue_balls[randint(0, len(blue_balls) - 1)]))
+        print('号：', result)

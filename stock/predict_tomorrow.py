@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression
 from datetime import datetime
 from sklearn.metrics import mean_squared_error
 import numpy as np
+import stock.data_processor as dp
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -33,11 +34,15 @@ def process_data(d):
 
 if __name__ == '__main__':
     data = pd.read_csv('HK800000.csv')
-    newest = data.tail(1)
-    data = process_data(data[0:-1])
+    n = 5
+    data = dp.concat_last_n_lines(data, n)
+    newest = data.head(1)
+    data = process_data(data[1:-1*n])
     train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
+    attrs = ['open', 'high', 'close', 'change_rate', 'low', 'change_rate', 'last_close']
+    dp.concat_n_attrs(attrs, n)
     pipeline = Pipeline([
-        ('selector', DataFrameSelector(['open', 'high', 'close', 'change_rate', 'low', 'change_rate', 'last_close'])),
+        ('selector', DataFrameSelector(attrs)),
         # ('std_scaler', StandardScaler())
     ])
     prepared = pipeline.fit_transform(train_set)
