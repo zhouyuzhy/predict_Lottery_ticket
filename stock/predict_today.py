@@ -8,6 +8,7 @@ from datetime import datetime
 from sklearn.metrics import mean_squared_error
 import numpy as np
 import stock.data_processor as dp
+from sklearn.ensemble import RandomForestRegressor
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -28,40 +29,43 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 
 
 if __name__ == '__main__':
-    for file in ['HK.800000_TODAY_K_1M.csv', 'HK.800000_TODAY_K_3M.csv', 'HK.800000_TODAY_K_5M.csv',
-                 'HK.800000_TODAY_K_15M.csv', 'HK.800000_TODAY_K_30M.csv', 'HK.800000_TODAY_K_60M.csv',
-                 'HK.800000_TODAY_K_DAY.csv']:
-        data = pd.read_csv(file)
-        n = 5
-        data = dp.concat_last_n_lines(data, n)
-        newest = data.head(1)
-        data = data[1:-1*n]
-        train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-        attrs = ['open', 'high', 'low', 'last_close']
-        attrs = dp.concat_n_attrs(attrs, n)
-        pipeline = Pipeline([
-            ('selector', DataFrameSelector(attrs)),
-            # ('std_scaler', StandardScaler())
-        ])
-        prepared = pipeline.fit_transform(train_set)
-        lin_reg = LinearRegression()
-        lin_reg.fit(prepared, train_set['close'])
-        # test预测
-        predictions = lin_reg.predict(pipeline.fit_transform(test_set))
-        # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
-        # print(key, "predictions: ", predictions)
-        targets = test_set['close']
-        # print(key, "labels: ", list(targets))
+    for lin_reg in [LinearRegression()]:
+        print('------', lin_reg, '---------')
+        for file in ['HK.800000_TODAY_K_1M.csv', 'HK.800000_TODAY_K_3M.csv', 'HK.800000_TODAY_K_5M.csv',
+                     'HK.800000_TODAY_K_15M.csv', 'HK.800000_TODAY_K_30M.csv', 'HK.800000_TODAY_K_60M.csv',
+                     'HK.800000_TODAY_K_DAY.csv']:
+            data = pd.read_csv(file)
+            n = 5
+            data = dp.concat_last_n_lines(data, n)
+            newest = data.head(1)
+            data = data[1:-1*n]
+            train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
+            attrs = ['open', 'high', 'low', 'last_close']
+            attrs = dp.concat_n_attrs(attrs, n)
+            pipeline = Pipeline([
+                ('selector', DataFrameSelector(attrs)),
+                # ('std_scaler', StandardScaler())
+            ])
+            prepared = pipeline.fit_transform(train_set)
+            lin_reg = LinearRegression()
+            lin_reg.fit(prepared, train_set['close'])
+            # test预测
+            predictions = lin_reg.predict(pipeline.fit_transform(test_set))
+            # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
+            # print(key, "predictions: ", predictions)
+            targets = test_set['close']
+            # print(key, "labels: ", list(targets))
 
-        # test验证
-        line_mse = mean_squared_error(targets, predictions)
-        line_rmse = np.sqrt(line_mse)
-        print(file, ':', line_rmse)
+            # test验证
+            line_mse = mean_squared_error(targets, predictions)
+            line_rmse = np.sqrt(line_mse)
+            print(file, ':', line_rmse)
+            dp.val_score(lin_reg, prepared, train_set['close'])
 
-        # predict
-        # data = pd.read_csv('HK.800000_TODAY_DAY_K.csv')
-        # newest = pd.DataFrame([{'time_key': '2020-10-29 00:00:00', 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
-        #                         'last_close': 24708.80}])
-        # newest = data.tail(1)
-        predict = lin_reg.predict(pipeline.fit_transform(newest))
-        print(file, ':', predict)
+            # predict
+            # data = pd.read_csv('HK.800000_TODAY_DAY_K.csv')
+            # newest = pd.DataFrame([{'time_key': '2020-10-29 00:00:00', 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
+            #                         'last_close': 24708.80}])
+            # newest = data.tail(1)
+            predict = lin_reg.predict(pipeline.fit_transform(newest))
+            print(file, ':', predict)

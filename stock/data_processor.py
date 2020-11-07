@@ -1,5 +1,7 @@
 from pandas import DataFrame
 import pandas
+from sklearn.model_selection import cross_val_score
+import numpy as np
 
 
 def concat_last_n_lines(X, n):
@@ -25,3 +27,12 @@ def concat_n_attrs(attrs, n):
         for index in org_attrs:
             result.append(index+'_'+str(i+1))
     return result
+
+
+def val_score(model, X, Y):
+    scores = cross_val_score(model, X, Y, scoring="neg_mean_squared_error", cv=10)
+    rmse_scores = np.sqrt(-scores)
+    print("Scores:", rmse_scores)
+    print("Mean:", rmse_scores.mean())
+    print("Standard deviation:", rmse_scores.std())
+
