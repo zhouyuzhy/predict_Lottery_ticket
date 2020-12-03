@@ -13,6 +13,7 @@ import stock.data_processor as dp
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from stock import futu_history_k
+import os
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -113,7 +114,12 @@ if __name__ == '__main__':
             tomorrow = today + datetime.timedelta(days=1)
             result['date'] = tomorrow.strftime('%Y-%m-%d')
             result['correct'] = -2
-            # pd.DataFrame.from_dict(result).to_csv(code + '_predict.csv', mode='a', header=False)
-            data_to_write = pd.read_csv(code + '_predict.csv', index_col=0).append(result, ignore_index=True)
+
+            filePath = code + '_predict.csv'
+            data_to_write = None
+            if os.path.exists(filePath):
+                data_to_write = pd.read_csv(filePath, index_col=0).append(result, ignore_index=True)
+            else:
+                data_to_write = pd.DataFrame.from_dict(result)
             data_to_write.drop_duplicates('date', keep='last', inplace=True)
-            data_to_write.to_csv(code + '_predict.csv')
+            data_to_write.to_csv(filePath)

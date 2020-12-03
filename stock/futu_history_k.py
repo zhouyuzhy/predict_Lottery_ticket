@@ -2,12 +2,17 @@ from futu import *
 import pandas as pd
 from datetime import datetime
 
-
 STOCK_CODE_MEITUAN = 'HK.03690'
 
 STOCK_CODE_TENGXUN = 'HK.00700'
 
-STOCK_CODES = [STOCK_CODE_MEITUAN, STOCK_CODE_TENGXUN]
+STOCK_CODE_BABA = 'HK.09988'
+
+STOCK_CODE_MI = 'HK.01810'
+
+STOCK_CODE_HENGSHENG = 'HK.800000'
+
+STOCK_CODES = [STOCK_CODE_MEITUAN, STOCK_CODE_TENGXUN, STOCK_CODE_BABA, STOCK_CODE_MI, STOCK_CODE_HENGSHENG]
 
 START_DATE = '2017-01-01'
 END_DATE = datetime.now().strftime('%Y-%m-%d')
@@ -33,12 +38,13 @@ def fetch_stock_datas():
         while page_req_key is not None:  # 请求后面的所有结果
             print('*************************************')
             ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
-                                                                      max_count=1000, page_req_key=page_req_key)  # 请求翻页后的数据
+                                                                      max_count=1000,
+                                                                      page_req_key=page_req_key)  # 请求翻页后的数据
             if ret == RET_OK:
                 data_list.append(data)
             else:
                 print('error:', data)
         data_pd = pd.DataFrame(data)
-        data_pd.to_csv(STOCK_CODE+'.csv')
+        data_pd.to_csv(STOCK_CODE + '.csv')
         print('All pages are finished!')
     quote_ctx.close()
