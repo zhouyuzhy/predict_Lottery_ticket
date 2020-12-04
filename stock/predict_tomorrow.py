@@ -27,7 +27,8 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         X_new = X.copy()
         X_new['week_day'] = X_new.apply(lambda x: dt.strptime(x['time_key'], '%Y-%m-%d %H:%M:%S').weekday(),
                                         axis=1)
-        return X_new[self.attribute_names + ['week_day']].values
+        X_new['incr'] = X_new['close'] - X_new['open']
+        return X_new[self.attribute_names + ['week_day', 'incr']].values
 
 
 TAGETs = ['high', 'low', 'open', 'close']
@@ -64,10 +65,11 @@ if __name__ == '__main__':
                 data = process_data(data[1:-1 * n], TARGET)
                 train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
                 attrs = ['open', 'high', 'close', 'low', 'last_close']
-                dp.concat_n_attrs(attrs, n)
+                attrs = dp.concat_n_attrs(attrs, n)
                 if isinstance(lin_reg, LinearRegression):
                     pipeline = Pipeline([
-                        ('selector', DataFrameSelector(attrs))
+                        ('selector', DataFrameSelector(attrs)),
+                        # ('std_scaler', StandardScaler())
                     ])
                 elif isinstance(lin_reg, SGDRegressor):
                     pipeline = Pipeline([
@@ -91,6 +93,7 @@ if __name__ == '__main__':
                 # newest = pd.DataFrame(
                 #     [{'time_key': '2020-10-29 00:00:00', 'close': 24586.60, 'change_rate':-0.49, 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
                 #       'last_close': 24708.80}])
+                print("coef:", lin_reg.coef_)
                 predict = lin_reg.predict(pipeline.fit_transform(newest))
                 print(code, '_', TARGET, predict)
                 result[TARGET] = predict
