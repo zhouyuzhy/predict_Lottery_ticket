@@ -18,8 +18,10 @@ STOCK_CODE_WY = 'HK.09999'
 
 STOCK_CODE_BYD = 'HK.01211'
 
+STOCK_CODE_ZHONGXINGUOJI = 'HK.00981'
+
 STOCK_CODES = [STOCK_CODE_MEITUAN, STOCK_CODE_TENGXUN, STOCK_CODE_BABA, STOCK_CODE_MI, STOCK_CODE_HENGSHENG,
-               STOCK_CODE_JD, STOCK_CODE_WY, STOCK_CODE_BYD]
+               STOCK_CODE_JD, STOCK_CODE_BYD, STOCK_CODE_ZHONGXINGUOJI]
 
 START_DATE = '2017-01-01'
 END_DATE = datetime.now().strftime('%Y-%m-%d')
@@ -32,6 +34,7 @@ def fetch_stock_datas():
         print(data)
     else:
         print('error:', data)
+        raise Exception('unknown error')
     for STOCK_CODE in STOCK_CODES:
         ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
                                                                   max_count=1000)  # 每页5个，请求第一页
@@ -41,6 +44,7 @@ def fetch_stock_datas():
             print(data['close'].values.tolist())  # 第一页收盘价转为list
         else:
             print('error:', data)
+            raise Exception('unknown error')
         data_list = []
         while page_req_key is not None:  # 请求后面的所有结果
             print('*************************************')
@@ -51,7 +55,9 @@ def fetch_stock_datas():
                 data_list.append(data)
             else:
                 print('error:', data)
+                raise Exception('unknown error')
         data_pd = pd.DataFrame(data)
+        data_pd['incr'] = (data_pd['close']-data_pd['last_close']>0).astype(int)
         data_pd.to_csv(STOCK_CODE + '.csv')
         print('All pages are finished!')
     quote_ctx.close()

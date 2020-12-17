@@ -27,11 +27,10 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         X_new = X.copy()
         X_new['week_day'] = X_new.apply(lambda x: dt.strptime(x['time_key'], '%Y-%m-%d %H:%M:%S').weekday(),
                                         axis=1)
-        X_new['incr'] = X_new['close'] - X_new['open']
-        return X_new[self.attribute_names + ['week_day', 'incr']].values
+        return X_new[self.attribute_names + ['week_day']].values
 
 
-TAGETs = ['high', 'low', 'open', 'close']
+TAGETs = ['high', 'low', 'open', 'close', 'incr']
 
 
 def process_data(d1, TARGET):
@@ -48,7 +47,21 @@ def process_data(d1, TARGET):
 def validate(targets, predictions):
     line_mse = mean_squared_error(targets, predictions)
     line_rmse = np.sqrt(line_mse)
-    # print(line_rmse)
+    print(line_rmse)
+
+
+def fix_incr_correct(last_day_prediction, time_key, today_real_incr, key_suffix=None):
+    incr_key = 'incr'
+    if key_suffix is not None:
+        incr_key = incr_key + key_suffix
+    last_day_prediction_incr = last_day_prediction.loc[last_day_prediction['date'].isin([time_key])][incr_key]
+    if len(last_day_prediction_incr) == 0:
+        return
+    correct_key = 'correct'
+    if key_suffix is not None:
+        correct_key = correct_key + key_suffix
+    last_day_prediction.loc[last_day_prediction['date'].isin([time_key]), correct_key] = (
+                today_real_incr.values[0] == last_day_prediction_incr.values[0])*1
 
 
 if __name__ == '__main__':
@@ -58,13 +71,13 @@ if __name__ == '__main__':
             print('----------', lin_reg, '-----------------')
             result = {}
             for TARGET in TAGETs:
-                data = pd.read_csv(code + '.csv')
+                data1 = pd.read_csv(code + '.csv')
                 n = 5
-                data = dp.concat_last_n_lines(data, n)
+                data = dp.concat_last_n_lines(data1, n)
                 newest = data.head(1)
                 data = process_data(data[1:-1 * n], TARGET)
                 train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-                attrs = ['open', 'high', 'close', 'low', 'last_close']
+                attrs = ['open', 'high', 'close', 'low', 'last_close', 'incr']
                 attrs = dp.concat_n_attrs(attrs, n)
                 if isinstance(lin_reg, LinearRegression):
                     pipeline = Pipeline([
@@ -86,35 +99,37 @@ if __name__ == '__main__':
                 # print(key, "labels: ", list(targets))
 
                 # test验证
-                # validate(targets, predictions)
-                # dp.val_score(lin_reg, prepared, train_set['tomorrow_' + TARGET])
-
+                if TARGET == 'incr':
+                    validate(targets, predictions)
+                    dp.val_score(lin_reg, prepared, train_set['tomorrow_' + TARGET])
+                    print("coef:", lin_reg.coef_)
                 # predict
                 # newest = pd.DataFrame(
                 #     [{'time_key': '2020-10-29 00:00:00', 'close': 24586.60, 'change_rate':-0.49, 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
                 #       'last_close': 24708.80}])
-                print("coef:", lin_reg.coef_)
+
                 predict = lin_reg.predict(pipeline.fit_transform(newest))
                 print(code, '_', TARGET, predict)
-                result[TARGET] = predict
+                result[TARGET] = round(predict[0],1)
 
-            incr = None
+            # incr = None
             for key in result.keys():
                 if key != 'close':
                     continue
                 if result[key] > newest['close'][0]:
                     incr = 1
                 elif result[key] < newest['close'][0]:
-                    incr = -1
-                else:
                     incr = 0
             result['current_close'] = newest['close'][0]
-            result['incr'] = incr
+            result['incr_by_close_open'] = incr
             # 今天日期
             today = datetime.date.today()
 
             # 明天时间
-            tomorrow = today + datetime.timedelta(days=1)
+            if today.weekday() == 4:
+                tomorrow = today + datetime.timedelta(days=3)
+            else:
+                tomorrow = today + datetime.timedelta(days=1)
             result['date'] = tomorrow.strftime('%Y-%m-%d')
             result['correct'] = -2
 
@@ -123,6 +138,11 @@ if __name__ == '__main__':
             if os.path.exists(filePath):
                 data_to_write = pd.read_csv(filePath, index_col=0).append(result, ignore_index=True)
             else:
-                data_to_write = pd.DataFrame.from_dict(result)
+                data_to_write = pd.DataFrame(result, index=[0])
+            today_real_incr = data1.loc[data1['time_key'].isin([today.strftime('%Y-%m-%d') + ' 00:00:00'])]['incr']
+            key_suffix = '_by_close_open'
+            fix_incr_correct(data_to_write, today.strftime('%Y-%m-%d'), today_real_incr)
+            fix_incr_correct(data_to_write, today.strftime('%Y-%m-%d'), today_real_incr, key_suffix=key_suffix)
             data_to_write.drop_duplicates('date', keep='last', inplace=True)
+            data_to_write = data_to_write.reindex(sorted(data_to_write.columns), axis=1)
             data_to_write.to_csv(filePath)
