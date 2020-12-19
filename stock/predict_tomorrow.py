@@ -13,6 +13,7 @@ import stock.data_processor as dp
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from stock import futu_history_k
+import matplotlib.pyplot as plt
 import os
 
 
@@ -35,13 +36,12 @@ TAGETs = ['high', 'low', 'open', 'close', 'incr']
 
 def process_data(d1, TARGET):
     d = d1.copy()
-    tomorrow_close = d[TARGET][1:]
-    l = []
+    tomorrow_close = d[TARGET][:-1]
+    l = [0]
     for tc in tomorrow_close:
         l.append(tc)
-    l.append(0)
     d['tomorrow_' + TARGET] = l
-    return d[0:-1]
+    return d[1:]
 
 
 def validate(targets, predictions):
@@ -61,7 +61,7 @@ def fix_incr_correct(last_day_prediction, time_key, today_real_incr, key_suffix=
     if key_suffix is not None:
         correct_key = correct_key + key_suffix
     last_day_prediction.loc[last_day_prediction['date'].isin([time_key]), correct_key] = (
-                today_real_incr.values[0] == last_day_prediction_incr.values[0])*1
+                today_real_incr.values[0] == round(last_day_prediction_incr.values[0],0))*1
 
 
 if __name__ == '__main__':
@@ -71,46 +71,45 @@ if __name__ == '__main__':
             print('----------', lin_reg, '-----------------')
             result = {}
             for TARGET in TAGETs:
+                print('=========', TARGET, '============')
                 data1 = pd.read_csv(code + '.csv')
                 n = 5
                 data = dp.concat_last_n_lines(data1, n)
                 newest = data.head(1)
                 data = process_data(data[1:-1 * n], TARGET)
                 train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-                attrs = ['open', 'high', 'close', 'low', 'last_close', 'incr']
+                attrs = ['open', 'high', 'close', 'low', 'last_close', 'change_rate', 'incr']
                 attrs = dp.concat_n_attrs(attrs, n)
                 if isinstance(lin_reg, LinearRegression):
                     pipeline = Pipeline([
                         ('selector', DataFrameSelector(attrs)),
-                        # ('std_scaler', StandardScaler())
                     ])
-                elif isinstance(lin_reg, SGDRegressor):
+                else:
                     pipeline = Pipeline([
                         ('selector', DataFrameSelector(attrs)),
                         ('std_scaler', StandardScaler())
                     ])
                 prepared = pipeline.fit_transform(train_set)
-                lin_reg.fit(prepared, train_set['tomorrow_' + TARGET])
+                train_target = train_set['tomorrow_' + TARGET]
+                lin_reg.fit(prepared, train_target)
                 # test预测
-                predictions = lin_reg.predict(pipeline.fit_transform(test_set))
-                # predictions = sgd_clf.predict(pipeline.fit_transform(test_set))
-                # print(key, "predictions: ", predictions)
+                test_set_prepared = pipeline.fit_transform(test_set)
+                predictions = lin_reg.predict(test_set_prepared)
                 targets = test_set['tomorrow_' + TARGET]
-                # print(key, "labels: ", list(targets))
 
                 # test验证
-                if TARGET == 'incr':
-                    validate(targets, predictions)
-                    dp.val_score(lin_reg, prepared, train_set['tomorrow_' + TARGET])
-                    print("coef:", lin_reg.coef_)
-                # predict
-                # newest = pd.DataFrame(
-                #     [{'time_key': '2020-10-29 00:00:00', 'close': 24586.60, 'change_rate':-0.49, 'open': 24290.01, 'high': 24678.90, 'low': 24258.56,
-                #       'last_close': 24708.80}])
+                # if TARGET == 'incr':
+                validate(targets, predictions)
+                dp.val_score(lin_reg, prepared, train_target)
+                sorted_attr_assoc = sorted(zip(lin_reg.coef_, attrs + ['week_day']), reverse=True)
+                print('coef:', sorted_attr_assoc)
+                # data.plot(kind='scatter', x=sorted_attr_assoc[0][1], y='tomorrow_'+TARGET, alpha=0.1)
+                # plt.show()
 
+                # 预测值
                 predict = lin_reg.predict(pipeline.fit_transform(newest))
                 print(code, '_', TARGET, predict)
-                result[TARGET] = round(predict[0],1)
+                result[TARGET] = round(predict[0],2)
 
             # incr = None
             for key in result.keys():
@@ -126,8 +125,8 @@ if __name__ == '__main__':
             today = datetime.date.today()
 
             # 明天时间
-            if today.weekday() == 4:
-                tomorrow = today + datetime.timedelta(days=3)
+            if today.weekday() >= 4:
+                tomorrow = today + datetime.timedelta(days=7-today.weekday())
             else:
                 tomorrow = today + datetime.timedelta(days=1)
             result['date'] = tomorrow.strftime('%Y-%m-%d')
