@@ -48,6 +48,7 @@ def validate(targets, predictions):
     line_mse = mean_squared_error(targets, predictions)
     line_rmse = np.sqrt(line_mse)
     print(line_rmse)
+    return line_rmse
 
 
 def fix_incr_correct(last_day_prediction, time_key, today_real_incr, key_suffix=None):
@@ -99,7 +100,7 @@ if __name__ == '__main__':
 
                 # test验证
                 # if TARGET == 'incr':
-                validate(targets, predictions)
+                rmse = validate(targets, predictions)
                 dp.val_score(lin_reg, prepared, train_target)
                 sorted_attr_assoc = sorted(zip(lin_reg.coef_, attrs + ['week_day']), reverse=True)
                 print('coef:', sorted_attr_assoc)
@@ -109,7 +110,9 @@ if __name__ == '__main__':
                 # 预测值
                 predict = lin_reg.predict(pipeline.fit_transform(newest))
                 print(code, '_', TARGET, predict)
-                result[TARGET] = round(predict[0],2)
+                result[TARGET] = round(predict[0], 2)
+                if TARGET == 'close':
+                    result['rmse_'+TARGET] = round(result[TARGET] - round(rmse, 2) - newest['close'][0],2)
 
             # incr = None
             for key in result.keys():

@@ -20,8 +20,10 @@ STOCK_CODE_BYD = 'HK.01211'
 
 STOCK_CODE_ZHONGXINGUOJI = 'HK.00981'
 
+STOCK_CODE_HENGSHENG_KEJI = 'HK.800700'
+
 STOCK_CODES = [STOCK_CODE_MEITUAN, STOCK_CODE_TENGXUN, STOCK_CODE_BABA, STOCK_CODE_MI, STOCK_CODE_HENGSHENG,
-               STOCK_CODE_JD, STOCK_CODE_BYD, STOCK_CODE_ZHONGXINGUOJI]
+               STOCK_CODE_JD, STOCK_CODE_BYD, STOCK_CODE_ZHONGXINGUOJI, STOCK_CODE_HENGSHENG_KEJI]
 
 START_DATE = '2017-01-01'
 END_DATE = datetime.now().strftime('%Y-%m-%d')
@@ -36,16 +38,14 @@ def fetch_stock_datas():
         print('error:', data)
         raise Exception('unknown error')
     for STOCK_CODE in STOCK_CODES:
+        data_list = []
         ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
                                                                   max_count=1000)  # 每页5个，请求第一页
         if ret == RET_OK:
-            print(data)
-            print(data['code'][0])  # 取第一条的股票代码
-            print(data['close'].values.tolist())  # 第一页收盘价转为list
+            data_list.append(data)
         else:
             print('error:', data)
             raise Exception('unknown error')
-        data_list = []
         while page_req_key is not None:  # 请求后面的所有结果
             print('*************************************')
             ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
