@@ -1,2 +1,3 @@
-,close,correct,current_close,date,high,incr,incr_by_close_open,low,open,rmse_close
-1,8406.34,-2,8426.07,2020-12-24,8548.03,0.02,0,8343.25,8464.75,-304.7
+,close,correct,correct_by_close_open,current_close,date,high,incr,incr_by_close_open,low,open,rmse_close
+0,8406.34,1,1.0,8426.07,2020-12-24,8548.03,0.02,0,8343.25,8464.75,-304.7
+2,7885.89,-2,,8142.81,2020-12-25,8083.11,-0.25,0,7827.85,7963.97,-552.77
