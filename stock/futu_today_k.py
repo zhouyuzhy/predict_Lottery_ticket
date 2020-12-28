@@ -18,7 +18,9 @@ if __name__ == '__main__':
                         SubType.K_1M]:
             ret, data = quote_ctx.get_cur_kline(STOCK_CODE, 1000, subType, AuType.QFQ)
             if ret == RET_OK:
-                pd.DataFrame(data).to_csv(STOCK_CODE + '_TODAY_' + subType + '.csv')
+                data_pd = pd.DataFrame(data)
+                data_pd['incr'] = (data_pd['close'] - data_pd['last_close'] > 0).astype(int)
+                data_pd.to_csv('today/'+STOCK_CODE + '_TODAY_' + subType + '.csv')
             else:
                 print('error:', data)
     else:
