@@ -15,6 +15,7 @@ from sklearn.model_selection import cross_val_score
 from stock import futu_history_k
 import matplotlib.pyplot as plt
 import os
+import time
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
@@ -65,7 +66,7 @@ def fix_incr_correct(last_day_prediction, time_key, today_real_incr, key_suffix=
                 today_real_incr.values[0] == round(last_day_prediction_incr.values[0],0))*1
 
 
-if __name__ == '__main__':
+def execute_predict():
     futu_history_k.fetch_stock_datas()
     for code in futu_history_k.STOCK_CODES:
         for lin_reg in [LinearRegression()]:
@@ -112,7 +113,7 @@ if __name__ == '__main__':
                 print(code, '_', TARGET, predict)
                 result[TARGET] = round(predict[0], 2)
                 if TARGET == 'close':
-                    result['rmse_'+TARGET] = round(result[TARGET] - round(rmse, 2) - newest['close'][0],2)
+                    result['rmse_' + TARGET] = round(result[TARGET] - round(rmse, 2) - newest['close'][0], 2)
 
             # incr = None
             for key in result.keys():
@@ -129,7 +130,7 @@ if __name__ == '__main__':
 
             # 明天时间
             if today.weekday() >= 4:
-                tomorrow = today + datetime.timedelta(days=7-today.weekday())
+                tomorrow = today + datetime.timedelta(days=7 - today.weekday())
             else:
                 tomorrow = today + datetime.timedelta(days=1)
             result['date'] = tomorrow.strftime('%Y-%m-%d')
@@ -148,3 +149,15 @@ if __name__ == '__main__':
             data_to_write.drop_duplicates('date', keep='last', inplace=True)
             data_to_write = data_to_write.reindex(sorted(data_to_write.columns), axis=1)
             data_to_write.to_csv(filePath)
+
+
+if __name__ == '__main__':
+    need_while = True
+    if need_while:
+        while True:
+            execute_predict()
+            time_stamp = datetime.datetime.now()
+            print(time_stamp.strftime('%Y.%m.%d-%H:%M:%S'))
+            time.sleep(600)
+    else:
+        execute_predict()
