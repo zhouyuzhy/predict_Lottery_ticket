@@ -3,10 +3,10 @@ import pandas as pd
 
 if __name__ == '__main__':
 
-    target_price = 300
-    now_price = 253.8
-    own_stock_price = [105, 75.5, 67, 48]
-    own_fund_wan = [32.5, 15.1, 13.4, 9.6]
+    target_price = 260
+    now_price = 244
+    own_stock_price = [29.5,52]
+    own_fund_wan = [21.2,29.6]
     delta = (target_price-now_price)
     own_stock_price_d = pd.DataFrame(own_stock_price)
     fund_d = pd.DataFrame(own_fund_wan)
