@@ -115,7 +115,7 @@ def execute_predict():
                 if TARGET == 'close':
                     result['rmse_' + TARGET] = round(result[TARGET] - round(rmse, 2) - newest['close'][0], 2)
 
-            # incr = None
+            incr = None
             for key in result.keys():
                 if key != 'close':
                     continue
@@ -158,6 +158,6 @@ if __name__ == '__main__':
             execute_predict()
             time_stamp = datetime.datetime.now()
             print(time_stamp.strftime('%Y.%m.%d-%H:%M:%S'))
-            time.sleep(600)
+            time.sleep(60)
     else:
         execute_predict()
