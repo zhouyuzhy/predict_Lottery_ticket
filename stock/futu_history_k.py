@@ -38,11 +38,11 @@ def fetch_stock_datas():
         print('error:', data)
         raise Exception('unknown error')
     for STOCK_CODE in STOCK_CODES:
-        data_list = []
+        data_list = pd.DataFrame()
         ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
                                                                   max_count=1000)  # 每页5个，请求第一页
         if ret == RET_OK:
-            data_list.append(data)
+            data_list = data
         else:
             print('error:', data)
             raise Exception('unknown error')
@@ -52,11 +52,11 @@ def fetch_stock_datas():
                                                                       max_count=1000,
                                                                       page_req_key=page_req_key)  # 请求翻页后的数据
             if ret == RET_OK:
-                data_list.append(data)
+                data_list = data_list.append(data, ignore_index=True)
             else:
                 print('error:', data)
                 raise Exception('unknown error')
-        data_pd = pd.DataFrame(data)
+        data_pd = data_list
         data_pd['incr'] = (data_pd['close']-data_pd['last_close']>0).astype(int)
         data_pd.to_csv(STOCK_CODE + '.csv')
         print('All pages are finished!')
