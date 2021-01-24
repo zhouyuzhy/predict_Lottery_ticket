@@ -105,6 +105,13 @@ def crossesUnder(stream1, stream2):
                     return 0
 
 
+RSI_KEYS = ['rsi6', 'rsi12', 'rsi24', 'crossover_6_12', 'crossover_6_24', 'crossover_12_24',
+            'upper_crossover_rsi_6', 'upper_crossover_rsi_12', 'upper_crossover_rsi_24',
+            'lower_crossover_rsi_6', 'lower_crossover_rsi_12', 'lower_crossover_rsi_24',
+            'crossunder_6_12', 'crossunder_6_24', 'crossunder_12_24',
+            'lower_crossunder_rsi_6', 'lower_crossunder_rsi_12', 'lower_crossunder_rsi_24',
+            'upper_crossunder_rsi_6', 'upper_crossunder_rsi_12', 'upper_crossunder_rsi_24']
+
 def set_rsi(data_pd):
     data_pd['rsi6'] = pd.Series(rsi(data_pd['close'], 6)).fillna(0).tolist()
     data_pd['rsi12'] = pd.Series(rsi(data_pd['close'], 12)).fillna(0).tolist()
@@ -126,11 +133,11 @@ def set_rsi(data_pd):
     data_pd['crossunder_12_24'] = [crossesUnder(data_pd['rsi12'].values[:i+1], data_pd['rsi24'].values[:i+1]) for i in range(len(data_pd))]
 
     data_pd['lower_crossunder_rsi_6'] = [crossesUnder(data_pd['rsi6'].values[:i+1], lower_rsi) for i in range(len(data_pd))]
-    data_pd['lower_crossunder_rsi_6'] = [crossesUnder(data_pd['rsi6'].values[:i+1], lower_rsi) for i in range(len(data_pd))]
     data_pd['lower_crossunder_rsi_12'] = [crossesUnder(data_pd['rsi12'].values[:i+1], lower_rsi) for i in range(len(data_pd))]
-    data_pd['upper_crossunder_rsi_6'] = [crossesUnder(data_pd['rsi6'].values[:i+1], upper_rsi) for i in range(len(data_pd))]
+    data_pd['lower_crossunder_rsi_24'] = [crossesUnder(data_pd['rsi24'].values[:i+1], lower_rsi) for i in range(len(data_pd))]
     data_pd['upper_crossunder_rsi_6'] = [crossesUnder(data_pd['rsi6'].values[:i+1], upper_rsi) for i in range(len(data_pd))]
     data_pd['upper_crossunder_rsi_12'] = [crossesUnder(data_pd['rsi12'].values[:i+1], upper_rsi) for i in range(len(data_pd))]
+    data_pd['upper_crossunder_rsi_24'] = [crossesUnder(data_pd['rsi24'].values[:i+1], upper_rsi) for i in range(len(data_pd))]
 
 
 def fetch_stock_datas():

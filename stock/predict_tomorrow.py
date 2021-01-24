@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 import os
 import time
 
+from stock.futu_history_k import RSI_KEYS
+
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
@@ -84,7 +86,7 @@ def execute_predict():
                 newest = data.head(1)
                 data = process_data(data[1:-1 * n], TARGET)
                 train_set, test_set = train_test_split(data, test_size=0.2, random_state=42)
-                attrs = ['open', 'high', 'close', 'low', 'last_close', 'change_rate', 'incr']
+                attrs = ['open', 'high', 'close', 'low', 'last_close', 'change_rate', 'incr'] + RSI_KEYS
                 attrs = dp.concat_n_attrs(attrs, n)
                 if isinstance(lin_reg, LinearRegression):
                     pipeline = Pipeline([
