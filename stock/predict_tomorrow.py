@@ -68,8 +68,9 @@ def fix_incr_correct(last_day_prediction, time_key, today_real_incr, key_suffix=
         predict_incr = 0
     else:
         predict_incr = 1
-    last_day_prediction.loc[last_day_prediction['date'].isin([time_key]), correct_key] = (
-                today_real_incr.values[0] == predict_incr)*1
+    if len(today_real_incr.values) > 0:
+        last_day_prediction.loc[last_day_prediction['date'].isin([time_key]), correct_key] = (
+                    today_real_incr.values[0] == predict_incr)*1
 
 
 def execute_predict():
