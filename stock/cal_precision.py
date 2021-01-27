@@ -9,7 +9,8 @@ if __name__ == '__main__':
         incr_same_count = len(datas[(datas['incr_by_close_open'] >= 0.5) & (datas['incr'] >= 0.5)])
         incr_correct_count = len(datas[(datas['incr_by_close_open'] >= 0.5) & (datas['incr'] >= 0.5) & (
                     datas['correct_by_close_open'] == 1) & (datas['correct'] == 1)])
-        result['incr_same'] = round(incr_correct_count / incr_same_count, 2)
+        if incr_same_count>0:
+            result['incr_same'] = round(incr_correct_count / incr_same_count, 2)
 
         drop_same_count = len(datas[(datas['incr_by_close_open'] < 0.5) & (datas['incr'] < 0.5)])
         drop_correct_count = len(datas[(datas['incr_by_close_open'] < 0.5) & (datas['incr'] < 0.5) & (
@@ -24,11 +25,13 @@ if __name__ == '__main__':
             incr_predict_count = len(datas[datas[incr_key] >= 0.5])
             incr_predict_right_count = len(datas[(datas[correct_key] == 1) & (datas[incr_key] >= 0.5)])
             print(code, incr_key, incr_predict_count, incr_predict_right_count)
-            result['incr_' + incr_key] = round(incr_predict_right_count / incr_predict_count, 2)
+            if incr_predict_count > 0:
+                result['incr_' + incr_key] = round(incr_predict_right_count / incr_predict_count, 2)
 
             drop_predict_count = len(datas[datas[incr_key] < 0.5])
             drop_predict_right_count = len(datas[(datas[correct_key] == 1) & (datas[incr_key] < 0.5)])
-            result['drop_' + incr_key] = round(drop_predict_right_count / drop_predict_count, 2)
+            if drop_predict_count > 0:
+                result['drop_' + incr_key] = round(drop_predict_right_count / drop_predict_count, 2)
 
             result['code'] = code
             print(result)
