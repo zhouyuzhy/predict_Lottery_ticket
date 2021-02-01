@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 
-from stock.futu_history_k import RSI_KEYS
+from stock.index.rsi.data_processor import RSI_KEYS
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
