@@ -101,9 +101,9 @@ if __name__ == '__main__':
                 predict_red_results.append((key, predictions[0]))
             if '蓝' in key:
                 predict_blue_results.append((key, predictions[0]))
-        print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:8])
+        print(sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:12])
         print(sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0:3])
-        for red_ball in sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:8]:
+        for red_ball in sorted(predict_red_results, key=itemgetter(1), reverse=True)[0:12]:
             red_balls.add(int(red_ball[0].replace('红_', '')))
         for blue_ball in sorted(predict_blue_results, key=itemgetter(1), reverse=True)[0:3]:
             blue_balls.add(int(blue_ball[0].replace('蓝_', '')))
