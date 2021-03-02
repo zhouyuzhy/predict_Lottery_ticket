@@ -37,14 +37,8 @@ class BaseDataStream(IDataStream):
             return pd.read_csv(cache_path)
         max_count = 1000
         quote_ctx = self.quote_ctx
-        ret, data = quote_ctx.get_history_kl_quota(get_detail=True)  # 设置True代表需要返回详细的拉取历史K 线的记录
-        if ret == RET_OK:
-            print(data)
-        else:
-            print('error:', data)
-            raise Exception('unknown error')
         data_list = pd.DataFrame()
-        ret, data, page_req_key = quote_ctx.request_history_kline(code, start=start, end=end,
+        ret, data, page_req_key = quote_ctx.request_history_kline(code, ktype=ktype, start=start, end=end,
                                                                   max_count=max_count)
         if ret == RET_OK:
             data_list = data
@@ -53,7 +47,8 @@ class BaseDataStream(IDataStream):
             raise Exception('unknown error')
         while page_req_key is not None:  # 请求后面的所有结果
             print('*************************************')
-            ret, data, page_req_key = quote_ctx.request_history_kline(code, start=start, end=end,
+            print('fetch page for', ktype)
+            ret, data, page_req_key = quote_ctx.request_history_kline(code, ktype=ktype, start=start, end=end,
                                                                       max_count=max_count,
                                                                       page_req_key=page_req_key)  # 请求翻页后的数据
             if ret == RET_OK:
