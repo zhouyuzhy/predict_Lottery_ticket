@@ -1,3 +1,4 @@
+from stock_trade.model.position import Position
 from stock_trade.operation import IOperation
 from datetime import datetime,timedelta
 import pandas as pd
@@ -32,22 +33,63 @@ class RecallOperation(IOperation):
     def __init__(self, strategy):
         self.strategy = strategy
 
+    def sell_out(self, asset, recall_cur_data):
+        positions = asset.positions
+        if len(positions) == 0:
+            return
+        to_clear_positions = []
+        for position in positions:
+            if position.code != recall_cur_data['code']:
+                continue
+            # 待减仓数据
+            to_clear_positions.append(position)
+            # 加钱
+            asset.money = asset.money + recall_cur_data['low'] * position.volume
+            # 记log
+            asset.operationsLogs.appendLog(position, 'sell')
+        # 平仓
+        for position in to_clear_positions:
+            positions.remove(position)
+
+    def buy_in(self, asset, recall_cur_data):
+        buy_in_price = recall_cur_data['high']
+        position_volume = int(asset.money / (buy_in_price * 100)) * 100
+        if position_volume < 100:
+            return
+        # 加持仓
+        position = Position(recall_cur_data['code'], buy_in_price, position_volume, 0)
+        asset.positions.append(position)
+        # 减钱
+        asset.money = asset.money - buy_in_price * position_volume
+        # 记log
+        asset.operationsLogs.appendLog(position, 'buy')
+
     def do_operation(self, asset, cur_data, history_data_15min, history_data_day):
+        # 初始资产
+        init_fund = asset.fund
+        snapshots = []
         for i in range(len(cur_data)):
             recall_cur_data = cur_data.iloc[i]
-            if '01-03' not in recall_cur_data['time_key']:
-                continue
             # 拿当前天当前时间之前的15min数据
             recall_history_data_15min = getCurDay15minK(recall_cur_data['time_key'], history_data_15min)
             # 拿当天之前的数据（含当天）
             recall_history_data_day = getCurDayDayK(recall_cur_data['time_key'], history_data_day)
-            isCallSignal = self.strategy.is_call_signal(recall_cur_data, recall_history_data_15min,
-                                                        recall_history_data_day)
             isPutSignal = self.strategy.is_put_signal(recall_cur_data, recall_history_data_15min,
                                                       recall_history_data_day)
-            print('curdata:', recall_cur_data)
-            print('isCallSignal', isCallSignal)
-            print('isPutSignal', isPutSignal)
-            if i > 3:
-                break
+            if isPutSignal:
+                self.sell_out(asset, recall_cur_data)
+
+            isCallSignal = self.strategy.is_call_signal(recall_cur_data, recall_history_data_15min,
+                                                        recall_history_data_day)
+            if isCallSignal:
+                self.buy_in(asset, recall_cur_data)
+
+            # 每天下午4点收盘结算资产、记录当日收益率
+            if ' 16:00:00' in recall_cur_data['time_key']:
+                pass
+
+
+
+
+
 
