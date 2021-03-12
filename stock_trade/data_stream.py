@@ -32,7 +32,7 @@ class BaseDataStream(IDataStream):
     def fetch_history(self, code, start, end, use_cache_first=False):
         ktype = self.ktype
         today = datetime.now().strftime('%Y-%m-%d')
-        cache_path = 'data/' + code + '_' + ktype + '_' + today + '.csv'
+        cache_path = 'data/' + code + '_' + ktype + '_' + start + '_' + end + '.csv'
         if use_cache_first and os.path.exists(cache_path):
             return pd.read_csv(cache_path)
         max_count = 1000

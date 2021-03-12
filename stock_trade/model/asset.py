@@ -11,20 +11,23 @@ class Asset:
         self.money = money
         # 总收益
         self.earnings = earnings
+        # 总收益率
+        self.earnings_ratio = 0
         # 持股变更记录
         self.operationsLogs = PositionOperationLog()
 
 
 class AssetSnapshot:
-    def __init__(self, time_key,  asset):
+    def __init__(self, time_key,  asset, stock_earnings_ratio):
         self.time_key = time_key
         self.asset = copy.deepcopy(asset)
+        self.stock_earnings_ratio = stock_earnings_ratio
 
 
 class PositionOperationLog:
     def __init__(self):
         self.operations = []
 
-    def appendLog(self, position, op):
-        self.operations.append((position, op))
+    def appendLog(self, position, op, time_key, earnings=0, sell_price=0):
+        self.operations.append((position, op, time_key, earnings, sell_price))
 
