@@ -71,4 +71,23 @@ def fetch_stock_datas():
 
 
 if __name__ == '__main__':
-    fetch_stock_datas()
+    quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
+    ret, data = quote_ctx.get_history_kl_quota(get_detail=True)  # 设置True代表需要返回详细的拉取历史K 线的记录
+    if ret == RET_OK:
+        print(data)
+    else:
+        print('error:', data)
+        raise Exception('unknown error')
+    for STOCK_CODE in ["HK.BK1063"]:
+        data_list = pd.DataFrame()
+        ret, data, page_req_key = quote_ctx.request_history_kline(STOCK_CODE, start=START_DATE, end=END_DATE,
+                                                                  max_count=1000)  # 每页5个，请求第一页
+        if ret == RET_OK:
+            data_list = data
+            print(data_list)
+        else:
+            print('error:', data)
+            raise Exception('unknown error')
+
+        print('All pages are finished!')
+    quote_ctx.close()
