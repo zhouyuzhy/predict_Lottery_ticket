@@ -9,6 +9,9 @@ threshold_fall_down_days = 2
 threshold_sell_low_line_ratio = 0.995
 # 前高定义天数
 threshold_days_last_high = 10
+# 最小止损点位，小于这个损失才止损
+min_loss_ratio = 0.01
+# 最大止损点位，大于这个损失才止损
 
 
 def break_through_high_win_line(cur_data, history_data_15min, history_data_day):
@@ -78,6 +81,21 @@ def fall_dow_high_win_line(cur_data, history_data_15min, history_data_day):
     pass
 
 
+def is_need_stop_loss(asset, cur_data):
+    if len(asset.positions) < 1:
+        return False
+    cur_price = cur_data['low']
+    cost_price = asset.positions[0].cost
+    if cur_price > cost_price:
+        return True
+    loss_ratio = (cost_price - cur_price) / cost_price
+    if loss_ratio < min_loss_ratio:
+        return True
+    if loss_ratio > max_loss_ratio.max_loss_ratio:
+        return True
+    return False
+
+
 class YingStrategy(IStrategy):
     def is_call_signal(self, cur_data, history_data_15min, history_data_day):
         if break_through_high_win_line(cur_data, history_data_15min, history_data_day):
@@ -86,9 +104,12 @@ class YingStrategy(IStrategy):
             return strategy_result_only_sell_put
         return strategy_result_no
 
-    def is_put_signal(self, cur_data, history_data_15min, history_data_day):
+    def is_put_signal(self, asset, cur_data, history_data_15min, history_data_day):
+        result = None
         if fall_down_low_win_line(cur_data, history_data_15min, history_data_day):
-            return strategy_result_yes
-        # if False and fall_dow_high_win_line(cur_data, history_data_15min, history_data_day):
-        #     return strategy_result_yes
+            result = strategy_result_yes
+        if result == strategy_result_yes:
+            # 如果盈利则直接止盈，如果亏损0.1%以内直接止损，否则下探止损线再止损
+            if is_need_stop_loss(asset, cur_data):
+                return strategy_result_yes
         return strategy_result_no

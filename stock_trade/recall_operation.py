@@ -1,6 +1,6 @@
 from matplotlib.ticker import MultipleLocator
 
-from stock_trade.constant import strategy_result_yes
+from stock_trade.constant import strategy_result_yes, max_loss_ratio
 from stock_trade.model.asset import AssetSnapshot
 from stock_trade.model.position import Position
 from stock_trade.operation import IOperation
@@ -9,7 +9,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import time
 from copy import deepcopy
-
 
 cache_15min_k = dict()
 cache_day_k = dict()
@@ -42,6 +41,13 @@ def getCurDayDayK(curTime, history_data_day):
             break
     cache_day_k[cache_key] = data_list
     return data_list
+
+
+def market_close(recall_cur_data):
+    if 'HK' in recall_cur_data['code']:
+        return ' 16:00:00' in recall_cur_data['time_key']
+    else:
+        return ' 15:00:00' in recall_cur_data['time_key']
 
 
 class RecallOperation(IOperation):
@@ -111,7 +117,7 @@ class RecallOperation(IOperation):
             recall_history_data_15min = getCurDay15minK(recall_cur_data['time_key'], history_data_15min)
             # 拿当天之前的数据（含当天）
             recall_history_data_day = getCurDayDayK(recall_cur_data['time_key'], history_data_day)
-            isPutSignal = self.strategy.is_put_signal(recall_cur_data, recall_history_data_15min,
+            isPutSignal = self.strategy.is_put_signal(asset, recall_cur_data, recall_history_data_15min,
                                                       recall_history_data_day)
             if isPutSignal == strategy_result_yes:
                 self.sell_out(asset, recall_cur_data)
@@ -122,7 +128,7 @@ class RecallOperation(IOperation):
                 self.buy_in(asset, recall_cur_data)
 
             # 每天下午4点收盘结算资产、记录当日收益率
-            if ' 16:00:00' in recall_cur_data['time_key']:
+            if market_close(recall_cur_data):
                 fund = self.recal_fund(recall_cur_data, asset)
                 asset.fund = fund
                 asset.earnings = fund - init_fund
@@ -137,7 +143,7 @@ class RecallOperation(IOperation):
         y_fund_earnings_ratio = [snapshot.asset.earnings_ratio for snapshot in snapshots]
         y_stock_earnings_ratio = [snapshot.stock_earnings_ratio for snapshot in snapshots]
         fg = plt.figure()
-        plt.title(code + ' Result Analysis')
+        plt.title(code + ' Result Analysis ' + str(max_loss_ratio.max_loss_ratio))
         plt.plot(x, y_fund_earnings_ratio, color='green', label='fund earnings ratio')
         plt.plot(x, y_stock_earnings_ratio, color='skyblue', label='stock earnings ratio')
         plt.legend()
@@ -150,5 +156,4 @@ class RecallOperation(IOperation):
         earnings_pd['x'] = x
         earnings_pd['y_fund_earnings_ratio'] = y_fund_earnings_ratio
         earnings_pd['y_stock_earnings_ratio'] = y_stock_earnings_ratio
-        earnings_pd.to_csv('data/earnings_'+code+'.csv')
-
+        earnings_pd.to_csv('data/earnings_' + code + '.csv')
