@@ -1,0 +1,6 @@
+
+STOCK_TYPE_STOCK="stock"
+
+STOCK_TYPE_PLATE="plate"
+
+STOCK_TYPE_INDEX="index"
