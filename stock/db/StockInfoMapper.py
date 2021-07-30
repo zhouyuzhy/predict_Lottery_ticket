@@ -1,4 +1,4 @@
-from stock.db import Session, StockInfo
+from stock.db import Session, StockInfo, session_scope
 
 
 def add_stock_info(stockInfo):
@@ -9,5 +9,5 @@ def add_stock_info(stockInfo):
 
 
 def query_stock_info(code):
-    session = Session()
-    return session.query(StockInfo).filter_by(code=code).all()
+    with session_scope() as session:
+        return session.query(StockInfo).filter_by(code=code).all()
