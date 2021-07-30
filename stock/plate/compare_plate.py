@@ -18,6 +18,26 @@ def compare(plate_k_lines, compare_k_lines):
                 compare_k_lines[-1].close / compare_k_lines[0].open)
 
 
+def daily_compare(plate_k_lines, compare_k_lines):
+    result = {}
+    for plate_k_line in plate_k_lines:
+        compare_k_line = [k_line for k_line in compare_k_lines if k_line.time_key==plate_k_line.time_key][0]
+        compare_ratio = (plate_k_line.close / plate_k_line.last_close) / (
+                compare_k_line.close / compare_k_line.last_close)
+        result.update({plate_k_line.time_key:compare_ratio})
+    return result
+
+
+def daily_with_start_compare(plate_k_lines, compare_k_lines):
+    result = {}
+    for plate_k_line in plate_k_lines:
+        compare_k_line = [k_line for k_line in compare_k_lines if k_line.time_key==plate_k_line.time_key][0]
+        compare_ratio = (plate_k_line.close / plate_k_lines[0].open) / (
+                compare_k_line.close / compare_k_lines[0].open)
+        result.update({plate_k_line.time_key:compare_ratio})
+    return result
+
+
 if __name__ == '__main__':
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
@@ -26,10 +46,12 @@ if __name__ == '__main__':
     if ret != RET_OK:
         print('error:', data)
         raise Exception
-    # 拉compare的k line
+    # 每日当天的涨跌幅与大盘对比
+    daily_compare_list = {}
+    # 每日距离开始时间的涨跌幅与大盘对比
+    daily_with_start_compare_list = {}
+    # 拉每一个版块的k line，与大盘对比开始到结束的涨幅
     compare_k_lines = fetch_stock_datas(COMPARE_TARGET,START_DATE, END_DATE)
-    # 拉每一个版块的k line，完成对比
-    i = 0
     for plate_code in data['code'].values:
         try:
             plate_k_lines = fetch_stock_datas(plate_code,START_DATE, END_DATE)
@@ -39,7 +61,15 @@ if __name__ == '__main__':
         compare_result = compare(plate_k_lines, compare_k_lines)
         plate_name = data.loc[data['code'] == plate_code]['plate_name'].values[0]
         plate_compare.update({plate_name: compare_result})
+
+        daily_compare_result = daily_compare(plate_k_lines, compare_k_lines)
+        daily_compare_list.update({plate_name: daily_compare_result})
+
+        daily_with_start_compare_result = daily_with_start_compare(plate_k_lines, compare_k_lines)
+        daily_with_start_compare_list.update({plate_name: daily_with_start_compare_result})
+    quote_ctx.close()
+    # 对比数据输出
     plate_compare_descending = OrderedDict(sorted(plate_compare.items(),
                                       key=lambda item: item[1], reverse=True))
     print(plate_compare_descending)
-    quote_ctx.close()
+    # 强于大盘的版块每日折线图
