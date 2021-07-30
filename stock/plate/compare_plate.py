@@ -3,14 +3,19 @@ from time import sleep
 
 from futu import *
 import pandas as pd
-from datetime import datetime
 
 from stock.fetch.fetch_store import fetch_stock_datas
+import matplotlib.pyplot as plt
+from pylab import *
+import datetime
+
+
+mpl.rcParams['font.sans-serif'] = ['SimHei']
 
 Market_CODE = Market.HK
 COMPARE_TARGET = 'HK.800000'
-START_DATE = '2021-04-01'
-END_DATE = datetime.now().strftime('%Y-%m-%d')
+START_DATE = '2021-07-12'
+END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 
 
 def compare(plate_k_lines, compare_k_lines):
@@ -73,3 +78,17 @@ if __name__ == '__main__':
                                       key=lambda item: item[1], reverse=True))
     print(plate_compare_descending)
     # 强于大盘的版块每日折线图
+    n=0
+    for plate_name in plate_compare_descending.keys():
+        if plate_compare_descending[plate_name] <= 1:
+            continue
+        daily_with_start_compare_result = daily_with_start_compare_list[plate_name]
+        x = daily_with_start_compare_result.keys()
+        y = daily_with_start_compare_result.values()
+        plt.plot(x, y, label=plate_name)
+        plt.legend()  # 让图例生效
+        n=n+1
+        if n>8:
+            break
+    print('总共'+str(n)+'种展示')
+    plt.show()
