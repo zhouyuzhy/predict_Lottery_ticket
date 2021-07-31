@@ -1,9 +1,5 @@
-import pandas as pd
-from config import *
-
-DATA = pd.read_csv("../" + train_data_path)
-if not len(DATA):
-    raise Exception("请执行 get_train_data.py 进行数据下载！")
+from lottery.config import *
+from lottery.db import UnionLottoMapper
 
 CONVERT = pd.read_csv("../data/convert.csv")
 
@@ -122,24 +118,25 @@ def for_loop_data_balls(data_balls, recent_count, ball_num, ball_type, issue=Non
 
 
 # [{"行":0,"期数":20098,"蓝":[1],"红":[1,2,3,4,5,6]}
-def transfer_data_balls():
+def transfer_data_balls(union_lotto_list):
     data_balls = []
-    for line in DATA.values:
+    for line in union_lotto_list:
         data_ball = dict()
-        data_ball['行'] = line[0]
-        data_ball['蓝'] = [line[8]]
-        data_ball['期数'] = line[1]
-        red_balls = []
-        for i in range(2, 8):
-            red_balls.append(line[+i])
+        data_ball['蓝'] = [line.blue_ball]
+        data_ball['期数'] = line.periods
+        red_balls = [line.red_ball_1, line.red_ball_2, line.red_ball_3,
+                     line.red_ball_4, line.red_ball_5, line.red_ball_6]
         data_ball['红'] = red_balls
         data_balls.append(data_ball)
+    data_balls.sort(key=lambda line:line['期数'])
     return data_balls
 
 
-def trans_data():
-    data_ball_list = transfer_data_balls()
+def trans_data(union_lotto_list):
+    data_ball_list = transfer_data_balls(union_lotto_list)
 
     model = construct_model(data_ball_list)
     # [{"期数":20097,"红_1":{"exist":0, 遗漏值等...}}]
-    pd.DataFrame(model).sort_values('期数', axis=0, ascending=False).to_csv('../data/convert.csv', index=False)
+    model = pd.DataFrame(model)
+    model.sort_values('期数', axis=0, ascending=False).to_csv('../data/convert.csv', index=False)
+    return model

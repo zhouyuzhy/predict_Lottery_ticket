@@ -3,10 +3,9 @@ from stock.db import Session, KLine, session_scope
 
 def add_kline(kLine):
     # 创建Session类实例
-    session = Session()
-    session.add(kLine)
-    session.commit()
-    
+    with session_scope() as session:
+        session.add(kLine)
+
 
 def query_single_kline(code, time_key):
     with session_scope() as session:

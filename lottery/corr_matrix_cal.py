@@ -1,6 +1,5 @@
-from pandas.plotting import scatter_matrix
 import matplotlib.pyplot as plt
-from config import CONVERT
+from lottery.config import CONVERT
 
 
 if __name__ == '__main__':

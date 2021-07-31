@@ -1,22 +1,15 @@
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
-import config
-from config import CONVERT, X_ATTRIBUTES, Y_ATTRIBUTES
+from lottery import config
+from lottery.config import X_ATTRIBUTES, Y_ATTRIBUTES
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import numpy as np
-import pandas as pd
 from operator import itemgetter
-from sklearn.linear_model import SGDClassifier
-import get_train_data
-import lottery.transfer_data
-import os
 from random import randint
 import stock.data_processor as dp
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import LinearSVR
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
