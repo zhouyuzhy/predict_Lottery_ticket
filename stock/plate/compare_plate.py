@@ -2,15 +2,15 @@ from collections import OrderedDict
 from time import sleep
 
 from futu import *
-import pandas as pd
 
 from stock.fetch.fetch_store import fetch_stock_datas
-import matplotlib.pyplot as plt
 from pylab import *
 import datetime
 
 
-mpl.rcParams['font.sans-serif'] = ['SimHei']
+# mpl.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
+
 
 Market_CODE = Market.HK
 COMPARE_TARGET = 'HK.800000'

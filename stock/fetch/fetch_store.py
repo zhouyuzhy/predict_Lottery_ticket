@@ -28,7 +28,7 @@ def fetch_stock_datas(stock_code, start_date, end_date):
         return kline_list
     if isPartial:
         start_date_obj = kline_list[-1].time_key + timedelta(days=1)
-        start_date_str = start_date_obj.strptime('%Y-%m-%d')
+        start_date_str = start_date_obj.strftime('%Y-%m-%d')
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     data_list = None
     ret, data, page_req_key = quote_ctx.request_history_kline(stock_code, start=start_date_str, end=end_date_str,
