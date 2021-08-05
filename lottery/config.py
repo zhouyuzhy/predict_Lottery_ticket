@@ -6,6 +6,8 @@
 import pandas as pd
 import os.path
 
+from lottery import CONVERT_ABSOLUTE_PATH
+
 URL = "https://datachart.500.com/ssq/history/"
 path = "newinc/history.php?start={}&end="
 
@@ -49,7 +51,7 @@ def init():
 
 
 init()
-if os.path.isfile('../data/convert.csv'):
-    CONVERT = pd.read_csv("../data/convert.csv")
+if os.path.isfile(CONVERT_ABSOLUTE_PATH):
+    CONVERT = pd.read_csv(CONVERT_ABSOLUTE_PATH)
 else:
     CONVERT = None

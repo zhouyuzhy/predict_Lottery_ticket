@@ -36,7 +36,7 @@ def spider(start, end):
     data = []
     for tr in trs:
         item = UnionLotto()
-        item.periods= tr.find_all("td")[0].get_text().strip()
+        item.periods= int(tr.find_all("td")[0].get_text().strip())
         item.red_ball_1 = tr.find_all("td")[1].get_text().strip()
         item.red_ball_2 = tr.find_all("td")[2].get_text().strip()
         item.red_ball_3 = tr.find_all("td")[3].get_text().strip()

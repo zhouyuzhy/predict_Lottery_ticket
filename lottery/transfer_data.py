@@ -1,7 +1,8 @@
+from lottery import PROJECT_LOTTERY_ABSOLUTE_PATH
 from lottery.config import *
 from lottery.db import UnionLottoMapper
 
-CONVERT = pd.read_csv("../data/convert.csv")
+CONVERT = pd.read_csv(CONVERT_ABSOLUTE_PATH)
 
 
 # 计算全量每一期次数、遗漏值等
@@ -138,5 +139,5 @@ def trans_data(union_lotto_list):
     model = construct_model(data_ball_list)
     # [{"期数":20097,"红_1":{"exist":0, 遗漏值等...}}]
     model = pd.DataFrame(model)
-    model.sort_values('期数', axis=0, ascending=False).to_csv('../data/convert.csv', index=False)
+    model.sort_values('期数', axis=0, ascending=False).to_csv(CONVERT_ABSOLUTE_PATH, index=False)
     return model

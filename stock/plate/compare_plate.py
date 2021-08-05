@@ -14,7 +14,7 @@ plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 
 Market_CODE = Market.HK
 COMPARE_TARGET = 'HK.800000'
-START_DATE = '2021-07-12'
+START_DATE = '2021-07-26'
 END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 
 

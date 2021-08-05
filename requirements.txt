@@ -12,3 +12,4 @@ lxml
 futu-api
 pyti
 sqlalchemy
+seaborn
