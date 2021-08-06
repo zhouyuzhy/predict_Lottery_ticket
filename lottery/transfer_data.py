@@ -129,7 +129,7 @@ def transfer_data_balls(union_lotto_list):
                      line.red_ball_4, line.red_ball_5, line.red_ball_6]
         data_ball['红'] = red_balls
         data_balls.append(data_ball)
-    data_balls.sort(key=lambda line:line['期数'])
+    data_balls.sort(key=lambda line:line['期数'], reverse=True)
     return data_balls
 
 
