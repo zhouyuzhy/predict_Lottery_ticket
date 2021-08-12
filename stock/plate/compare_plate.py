@@ -12,8 +12,15 @@ import datetime
 plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 
 
-Market_CODE = Market.HK
-COMPARE_TARGET = 'HK.800000'
+Market_CODE_HK = Market.HK
+COMPARE_TARGET_HK = 'HK.800000'
+
+Market_CODE_SH = Market.SH
+COMPARE_TARGET_SH = 'SH.000001'
+
+Market_CODE_SZ = Market.SZ
+COMPARE_TARGET_SZ = 'SZ.399001'
+
 START_DATE = '2021-07-26'
 END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 
@@ -43,11 +50,11 @@ def daily_with_start_compare(plate_k_lines, compare_k_lines):
     return result
 
 
-if __name__ == '__main__':
+def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK):
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     # code plate_name plate_id
-    ret, data = quote_ctx.get_plate_list(Market_CODE,Plate.INDUSTRY)
+    ret, data = quote_ctx.get_plate_list(market, Plate.INDUSTRY)
     if ret != RET_OK:
         print('error:', data)
         raise Exception
@@ -56,13 +63,13 @@ if __name__ == '__main__':
     # 每日距离开始时间的涨跌幅与大盘对比
     daily_with_start_compare_list = {}
     # 拉每一个版块的k line，与大盘对比开始到结束的涨幅
-    compare_k_lines = fetch_stock_datas(COMPARE_TARGET,START_DATE, END_DATE)
+    compare_k_lines = fetch_stock_datas(compare_code, START_DATE, END_DATE)
     for plate_code in data['code'].values:
         try:
-            plate_k_lines = fetch_stock_datas(plate_code,START_DATE, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, START_DATE, END_DATE)
         except Exception:
             sleep(60)
-            plate_k_lines = fetch_stock_datas(plate_code,START_DATE, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, START_DATE, END_DATE)
         compare_result = compare(plate_k_lines, compare_k_lines)
         plate_name = data.loc[data['code'] == plate_code]['plate_name'].values[0]
         plate_compare.update({plate_name: compare_result})
@@ -75,20 +82,31 @@ if __name__ == '__main__':
     quote_ctx.close()
     # 对比数据输出
     plate_compare_descending = OrderedDict(sorted(plate_compare.items(),
-                                      key=lambda item: item[1], reverse=True))
+                                                  key=lambda item: item[1], reverse=True))
     print(plate_compare_descending)
     # 强于大盘的版块每日折线图
-    n=0
+    n = 0
+    plt.figure()
     for plate_name in plate_compare_descending.keys():
         if plate_compare_descending[plate_name] <= 1:
             continue
         daily_with_start_compare_result = daily_with_start_compare_list[plate_name]
         x = daily_with_start_compare_result.keys()
         y = daily_with_start_compare_result.values()
+        plt.title(market, fontsize='large', fontweight = 'bold')
         plt.plot(x, y, label=plate_name)
         plt.legend()  # 让图例生效
-        n=n+1
-        if n>8:
+        n = n + 1
+        if n > 9:
             break
-    print('总共'+str(n)+'种展示')
+    print('总共' + str(n) + '种展示')
+
+
+if __name__ == '__main__':
+    plt.ion()
+    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK)
+    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH)
+    plt.ioff()
     plt.show()
+
+

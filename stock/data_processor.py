@@ -32,7 +32,7 @@ def concat_n_attrs(attrs, n):
 def val_score(model, X, Y):
     scores = cross_val_score(model, X, Y, scoring="neg_mean_squared_error", cv=10)
     rmse_scores = np.sqrt(-scores)
-    print("Scores:", rmse_scores)
-    print("Mean:", rmse_scores.mean())
-    print("Standard deviation:", rmse_scores.std())
+    # print("Scores:", rmse_scores)
+    # print("Mean:", rmse_scores.mean())
+    # print("Standard deviation:", rmse_scores.std())
 
