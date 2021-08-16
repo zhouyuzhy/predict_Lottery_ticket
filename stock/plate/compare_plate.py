@@ -50,7 +50,7 @@ def daily_with_start_compare(plate_k_lines, compare_k_lines):
     return result
 
 
-def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK):
+def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE):
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     # code plate_name plate_id
@@ -63,13 +63,13 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK)
     # 每日距离开始时间的涨跌幅与大盘对比
     daily_with_start_compare_list = {}
     # 拉每一个版块的k line，与大盘对比开始到结束的涨幅
-    compare_k_lines = fetch_stock_datas(compare_code, START_DATE, END_DATE)
+    compare_k_lines = fetch_stock_datas(compare_code, start_date, END_DATE)
     for plate_code in data['code'].values:
         try:
-            plate_k_lines = fetch_stock_datas(plate_code, START_DATE, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, start_date, END_DATE)
         except Exception:
             sleep(60)
-            plate_k_lines = fetch_stock_datas(plate_code, START_DATE, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, start_date, END_DATE)
         compare_result = compare(plate_k_lines, compare_k_lines)
         plate_name = data.loc[data['code'] == plate_code]['plate_name'].values[0]
         plate_compare.update({plate_name: compare_result})
@@ -104,8 +104,9 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK)
 
 if __name__ == '__main__':
     plt.ion()
-    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK)
-    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH)
+    start_date = '2021-07-01'
+    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date)
+    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date)
     plt.ioff()
     plt.show()
 
