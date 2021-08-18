@@ -50,7 +50,7 @@ def daily_with_start_compare(plate_k_lines, compare_k_lines):
     return result
 
 
-def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE):
+def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE, end_date=END_DATE):
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     # code plate_name plate_id
@@ -63,13 +63,13 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK,
     # 每日距离开始时间的涨跌幅与大盘对比
     daily_with_start_compare_list = {}
     # 拉每一个版块的k line，与大盘对比开始到结束的涨幅
-    compare_k_lines = fetch_stock_datas(compare_code, start_date, END_DATE)
+    compare_k_lines = fetch_stock_datas(compare_code, start_date, end_date)
     for plate_code in data['code'].values:
         try:
-            plate_k_lines = fetch_stock_datas(plate_code, start_date, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, start_date, end_date)
         except Exception:
             sleep(60)
-            plate_k_lines = fetch_stock_datas(plate_code, start_date, END_DATE)
+            plate_k_lines = fetch_stock_datas(plate_code, start_date, end_date)
         compare_result = compare(plate_k_lines, compare_k_lines)
         plate_name = data.loc[data['code'] == plate_code]['plate_name'].values[0]
         plate_compare.update({plate_name: compare_result})
@@ -97,16 +97,18 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK,
         plt.plot(x, y, label=plate_name)
         plt.legend()  # 让图例生效
         n = n + 1
-        if n > 9:
+        if n > 19:
             break
     print('总共' + str(n) + '种展示')
 
 
 if __name__ == '__main__':
     plt.ion()
-    start_date = '2021-07-01'
-    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date)
-    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date)
+    start_date = '2021-08-01'
+    # end_date = '2021-08-15'
+    end_date = END_DATE
+    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date)
+    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date)
     plt.ioff()
     plt.show()
 

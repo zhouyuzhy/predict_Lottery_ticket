@@ -18,3 +18,4 @@ class KLine(Base):
     turnover = Column(DECIMAL(20,2))
     change_rate = Column(DECIMAL(20,2))
     last_close = Column(DECIMAL(20,2))
+    create_time = Column(DateTime())

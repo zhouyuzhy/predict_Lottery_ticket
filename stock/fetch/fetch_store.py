@@ -10,8 +10,20 @@ def fetch_stock_datas(stock_code, start_date, end_date):
     end_date_str = end_date
     start_date_obj = datetime.strptime(start_date,'%Y-%m-%d')
     end_date_obj = datetime.strptime(end_date,'%Y-%m-%d')
+    # 周末的数据开始时间后移，结束时间前移
+    if start_date_obj.weekday()>4:
+        start_date_obj = start_date_obj + timedelta(days=7-start_date_obj.weekday())
+        start_date_str = start_date_obj.strftime('%Y-%m-%d')
+    if end_date_obj.weekday()>4:
+        end_date_obj = end_date_obj - timedelta(days=end_date_obj.weekday()-4)
+        end_date_str = end_date_obj.strftime('%Y-%m-%d')
     # 1、查询开始到结束时间DB中的数据
     kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj)
+    # 1.1、查询到的最后一天数据如果create_time的hour不是16点之后则删掉
+    last_kline = kline_list[-1]
+    if last_kline.create_time.hour < 16:
+        KLineMapper.delete_kline(last_kline)
+        kline_list = kline_list[:-1]
     # 2、如果DB中第一条时间晚于需要查询的时间，查全量api
     isAll = False
     isPartial = False
