@@ -50,7 +50,7 @@ def daily_with_start_compare(plate_k_lines, compare_k_lines):
     return result
 
 
-def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE, end_date=END_DATE):
+def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE, end_date=END_DATE, top_N = 9):
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     # code plate_name plate_id
@@ -97,18 +97,20 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK,
         plt.plot(x, y, label=plate_name)
         plt.legend()  # 让图例生效
         n = n + 1
-        if n > 19:
+        if n > top_N - 1:
             break
     print('总共' + str(n) + '种展示')
 
 
 if __name__ == '__main__':
     plt.ion()
-    start_date = '2021-08-01'
+    # start_date = '2021-08-09'
     # end_date = '2021-08-15'
+    start_date = (datetime.datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d')
     end_date = END_DATE
-    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date)
-    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date)
+    top_N = 15
+    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date, top_N)
+    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date, top_N)
     plt.ioff()
     plt.show()
 
