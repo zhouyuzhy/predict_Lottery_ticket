@@ -50,7 +50,7 @@ def daily_with_start_compare(plate_k_lines, compare_k_lines):
     return result
 
 
-def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE, end_date=END_DATE, top_N = 9):
+def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK, start_date=START_DATE, end_date=END_DATE, top_N = 9, reverse=True):
     plate_compare = {}
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     # code plate_name plate_id
@@ -82,14 +82,12 @@ def compare_all_processor(market=Market_CODE_HK, compare_code=COMPARE_TARGET_HK,
     quote_ctx.close()
     # 对比数据输出
     plate_compare_descending = OrderedDict(sorted(plate_compare.items(),
-                                                  key=lambda item: item[1], reverse=True))
+                                                  key=lambda item: item[1], reverse=reverse))
     print(plate_compare_descending)
     # 强于大盘的版块每日折线图
     n = 0
     plt.figure()
     for plate_name in plate_compare_descending.keys():
-        if plate_compare_descending[plate_name] <= 1:
-            continue
         daily_with_start_compare_result = daily_with_start_compare_list[plate_name]
         x = daily_with_start_compare_result.keys()
         y = daily_with_start_compare_result.values()
@@ -109,8 +107,9 @@ if __name__ == '__main__':
     start_date = (datetime.datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d')
     end_date = END_DATE
     top_N = 15
-    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date, top_N)
-    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date, top_N)
+    reverse = True
+    compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date, top_N, reverse)
+    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date, top_N, reverse)
     plt.ioff()
     plt.show()
 

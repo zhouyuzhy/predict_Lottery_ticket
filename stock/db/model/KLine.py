@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, BigInteger
 
 from stock.db.model import Base
 
@@ -14,7 +14,7 @@ class KLine(Base):
     low = Column(DECIMAL(20,2))
     pe_ratio = Column(DECIMAL(20,2))
     turnover_rate = Column(DECIMAL(20,2))
-    volume = Column(Integer())
+    volume = Column(DECIMAL(20,2))
     turnover = Column(DECIMAL(20,2))
     change_rate = Column(DECIMAL(20,2))
     last_close = Column(DECIMAL(20,2))

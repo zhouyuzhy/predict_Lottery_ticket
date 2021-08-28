@@ -20,10 +20,11 @@ def fetch_stock_datas(stock_code, start_date, end_date):
     # 1、查询开始到结束时间DB中的数据
     kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj)
     # 1.1、查询到的最后一天数据如果create_time的hour不是16点之后则删掉
-    last_kline = kline_list[-1]
-    if last_kline.create_time.hour < 16:
-        KLineMapper.delete_kline(last_kline)
-        kline_list = kline_list[:-1]
+    if len(kline_list) > 0:
+        last_kline = kline_list[-1]
+        if last_kline.create_time.hour < 16:
+            KLineMapper.delete_kline(last_kline)
+            kline_list = kline_list[:-1]
     # 2、如果DB中第一条时间晚于需要查询的时间，查全量api
     isAll = False
     isPartial = False
