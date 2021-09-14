@@ -15,3 +15,4 @@ sqlalchemy
 seaborn
 keras
 czsc
+tornado

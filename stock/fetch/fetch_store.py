@@ -3,9 +3,22 @@ from decimal import Decimal
 from futu import *
 from stock.db import *
 from stock.db import KLineMapper
+from stock.db.model import KLineLevel
 
 
-def fetch_stock_datas(stock_code, start_date, end_date):
+def fetch_stock_owner_plate(stock_code):
+    quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
+    ret, data = quote_ctx.get_owner_plate([stock_code])
+    if ret != RET_OK:
+        print('error:', data)
+        raise Exception('unknown error')
+    print(data)
+    print(data['code'][0])    # 取第一条的股票代码
+    print(data['plate_code'].values.tolist())   # 板块代码转为 list
+    quote_ctx.close()
+
+
+def fetch_stock_datas(stock_code, start_date, end_date, kline_level=KLineLevel.K_DAY):
     start_date_str = start_date
     end_date_str = end_date
     start_date_obj = datetime.strptime(start_date,'%Y-%m-%d')
@@ -18,7 +31,7 @@ def fetch_stock_datas(stock_code, start_date, end_date):
         end_date_obj = end_date_obj - timedelta(days=end_date_obj.weekday()-4)
         end_date_str = end_date_obj.strftime('%Y-%m-%d')
     # 1、查询开始到结束时间DB中的数据
-    kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj)
+    kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj, kline_level)
     # 1.1、查询到的最后一天数据如果create_time的hour不是16点之后则删掉
     if len(kline_list) > 0:
         last_kline = kline_list[-1]
@@ -44,7 +57,7 @@ def fetch_stock_datas(stock_code, start_date, end_date):
         start_date_str = start_date_obj.strftime('%Y-%m-%d')
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
     data_list = None
-    ret, data, page_req_key = quote_ctx.request_history_kline(stock_code, start=start_date_str, end=end_date_str,
+    ret, data, page_req_key = quote_ctx.request_history_kline(stock_code,ktype=kline_level, start=start_date_str, end=end_date_str,
                                                               max_count=1000)  # 每页5个，请求第一页
     if ret == RET_OK:
         data_list = data
@@ -53,7 +66,7 @@ def fetch_stock_datas(stock_code, start_date, end_date):
         raise Exception('unknown error')
     while page_req_key is not None:  # 请求后面的所有结果
         print('*************************************')
-        ret, data, page_req_key = quote_ctx.request_history_kline(stock_code, start=start_date_str, end=end_date_str,
+        ret, data, page_req_key = quote_ctx.request_history_kline(stock_code,ktype=kline_level, start=start_date_str, end=end_date_str,
                                                                   max_count=1000,
                                                                   page_req_key=page_req_key)  # 请求翻页后的数据
         if ret == RET_OK:

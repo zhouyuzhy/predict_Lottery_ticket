@@ -8,6 +8,7 @@ class KLine(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     code = Column(String(100))
     time_key = Column(DateTime())
+    kline_level = Column(String(100))
     open = Column(DECIMAL(20,2))
     close = Column(DECIMAL(20,2))
     high = Column(DECIMAL(20,2))
