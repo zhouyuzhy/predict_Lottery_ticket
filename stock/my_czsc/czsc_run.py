@@ -1,3 +1,5 @@
+import webbrowser
+
 import pandas as pd
 import traceback
 from datetime import datetime
@@ -22,22 +24,24 @@ def convert2RawBar(klines):
     return rowbars
 
 
-def stocks_dwm_selector(end_date: [str, datetime] = datetime.now().strftime('%Y-%m-%d'), data_path=None):
+def open_in_browser(c0):
+    home_path = os.path.expanduser("~")
+    file_html = os.path.join(home_path, "temp_czsc.html")
+    chart = c0.to_echarts()
+    chart.render(file_html)
+    webbrowser.open('file://' +os.path.realpath(file_html))
+
+
+def stocks_dwm_selector(codes, end_date: [str, datetime] = datetime.now().strftime('%Y-%m-%d')):
     """大级别选股（日线&月线&周线）"""
 
-    codes = ['HK.01347']
     for symbol in codes:
         try:
-            # k0 = ts.get_kline(symbol, asset='E', freq=Freq.D, start_date="20200101", end_date=end_date)
-            # k1 = ts.get_kline(symbol, asset='E', freq=Freq.W, start_date="20100101", end_date=end_date)
-            # k2 = ts.get_kline(symbol, asset='E', freq=Freq.M, start_date="20000101", end_date=end_date)
             datas = fetch_store.fetch_stock_datas(symbol, start_date="2021-01-01", end_date=end_date, kline_level=KLineLevel.K_60M)
             k0 = convert2RawBar(datas)
             c0 = CZSC(k0)
-            # c1 = CZSC(k1, get_signals=signals.get_selector_signals)
-            # c2 = CZSC(k2, get_signals=signals.get_selector_signals)
 
-            c0.open_in_browser()
+            open_in_browser(c0)
         except:
             print("fail on {}".format(symbol))
             traceback.print_exc()
@@ -45,4 +49,5 @@ def stocks_dwm_selector(end_date: [str, datetime] = datetime.now().strftime('%Y-
 
 
 if __name__ == '__main__':
-    stocks_dwm_selector()
+    codes = ['HK.01347', 'HK.02359', 'HK.09633']
+    stocks_dwm_selector(codes)

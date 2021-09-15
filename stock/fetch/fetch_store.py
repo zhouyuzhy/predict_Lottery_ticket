@@ -31,7 +31,10 @@ def fetch_stock_datas(stock_code, start_date, end_date, kline_level=KLineLevel.K
         end_date_obj = end_date_obj - timedelta(days=end_date_obj.weekday()-4)
         end_date_str = end_date_obj.strftime('%Y-%m-%d')
     # 1、查询开始到结束时间DB中的数据
-    kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj, kline_level)
+    if kline_level != KLineLevel.K_DAY:
+        kline_list = []
+    else:
+        kline_list = KLineMapper.query_kline(stock_code, start_date_obj, end_date_obj, kline_level)
     # 1.1、查询到的最后一天数据如果create_time的hour不是16点之后则删掉
     if len(kline_list) > 0:
         last_kline = kline_list[-1]
@@ -91,10 +94,12 @@ def fetch_stock_datas(stock_code, start_date, end_date, kline_level=KLineLevel.K
         kline.turnover = Decimal.from_float(data_list['turnover'][index])
         kline.change_rate = Decimal.from_float(data_list['change_rate'][index])
         kline.last_close = Decimal.from_float(data_list['last_close'][index])
+        kline.kline_level = kline_level
         data_kline_obj_list.append(kline)
-        kline_in_db = KLineMapper.query_single_kline(kline.code, kline.time_key)
-        if kline_in_db is None:
-            KLineMapper.add_kline(kline)
+        if kline_level == KLineLevel.K_DAY:
+            kline_in_db = KLineMapper.query_single_kline(kline.code, kline.time_key, kline.kline_level)
+            if kline_in_db is None:
+                KLineMapper.add_kline(kline)
 
     kline_list.extend(data_kline_obj_list)
     kline_list.sort(key=lambda kline: kline.time_key)
