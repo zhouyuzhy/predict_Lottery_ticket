@@ -63,17 +63,17 @@ if __name__ == '__main__':
         input_data_shape = tf.shape(input_text)
         # 构建RNN单元并初始化
         # 将一个或多个BasicLSTMCells 叠加在MultiRNNCell中，这里我们使用2层LSTM cell
-        cell = tf.nn.rnn.MultiRNNCell([tf.contrib.rnn.BasicLSTMCell(num_units=rnn_size) for _ in range(2)])
+        cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell([tf.compat.v1.nn.rnn_cell.BasicLSTMCell(num_units=rnn_size) for _ in range(2)])
         initial_state = cell.zero_state(input_data_shape[0], tf.float32)
         initial_state = tf.identity(initial_state, name="initial_state")
 
         # embed_matrix是嵌入矩阵，后面计算相似度(距离)的时候会用到
-        embed_matrix = tf.Variable(tf.random_uniform([vocab_size, embed_dim], -1, 1))
+        embed_matrix = tf.Variable(tf.random.uniform([vocab_size, embed_dim], -1, 1))
         # embed_layer是从嵌入矩阵（查找表）中索引到的向量
         embed_layer = tf.nn.embedding_lookup(embed_matrix, input_text)
 
         # 使用RNN单元构建RNN
-        outputs, state = tf.nn.dynamic_rnn(cell, embed_layer, dtype=tf.float32)
+        outputs, state = tf.compat.v1.nn.dynamic_rnn(cell, embed_layer, dtype=tf.float32)
         final_state = tf.identity(state, name="final_state")
 
         logits = tf.layers.dense(outputs, vocab_size)

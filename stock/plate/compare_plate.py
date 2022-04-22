@@ -104,12 +104,12 @@ if __name__ == '__main__':
     plt.ion()
     # start_date = '2021-08-09'
     # end_date = '2021-08-15'
-    start_date = (datetime.datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d')
+    start_date = (datetime.datetime.now() - timedelta(days=15)).strftime('%Y-%m-%d')
     end_date = END_DATE
     top_N = 15
     reverse = True
     compare_all_processor(Market_CODE_HK, COMPARE_TARGET_HK, start_date, end_date, top_N, reverse)
-    compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date, top_N, reverse)
+    # compare_all_processor(Market_CODE_SH, COMPARE_TARGET_SH, start_date, end_date, top_N, reverse)
     plt.ioff()
     plt.show()
 

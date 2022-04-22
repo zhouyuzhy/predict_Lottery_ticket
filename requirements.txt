@@ -14,5 +14,6 @@ pyti
 sqlalchemy
 seaborn
 keras
-czsc
+czsc==0.7.5
 tornado
+brokenaxes

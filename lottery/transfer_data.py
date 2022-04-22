@@ -1,4 +1,4 @@
-from lottery import PROJECT_LOTTERY_ABSOLUTE_PATH
+from lottery import PROJECT_LOTTERY_ABSOLUTE_PATH, fetch_and_store
 from lottery.config import *
 from lottery.db import UnionLottoMapper
 
@@ -141,3 +141,8 @@ def trans_data(union_lotto_list):
     model = pd.DataFrame(model)
     model.sort_values('期数', axis=0, ascending=False).to_csv(CONVERT_ABSOLUTE_PATH, index=False)
     return model
+
+
+if __name__ == '__main__':
+    union_lotto_list = fetch_and_store.fetch()
+    trans_data(union_lotto_list)
