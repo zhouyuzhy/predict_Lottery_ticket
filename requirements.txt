@@ -17,3 +17,6 @@ keras
 czsc==0.7.5
 tornado
 brokenaxes
+aligo
+adata
+sqlite-orm
