@@ -10,7 +10,7 @@ from lottery import CONVERT_ABSOLUTE_PATH
 # from lottery import CONVERT_ABSOLUTE_PATH
 URL = "https://datachart.500.com/ssq/history/"
 path = "newinc/history.php?start={}&end="
-
+# URL = "https://datachart.500.com/ssq/history/"
 BOLL_NAME = [
     "红球号码_1",
     "红球号码_2",
