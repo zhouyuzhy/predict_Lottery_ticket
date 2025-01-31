@@ -49,7 +49,7 @@ def init():
                         ball_type + '_' + str(ball_num) + '_' + suffix + str(recent_count))
             Y_ATTRIBUTES[ball_type + '_' + str(ball_num)] = ball_type + '_' + str(ball_num) + '_exist'
 
-
+# 用于转换的数据
 init()
 if os.path.isfile(CONVERT_ABSOLUTE_PATH):
     CONVERT = pd.read_csv(CONVERT_ABSOLUTE_PATH)
