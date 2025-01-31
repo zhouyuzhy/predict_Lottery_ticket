@@ -29,7 +29,7 @@ Y_ATTRIBUTES = None
 # 最近的数据数量
 RECENT_COUNTS = [10, 30, 50, 100]
 
-
+# 用于转换的数据
 def init():
     global BALL_ENUM, X_ATTRIBUTES, Y_ATTRIBUTES, RECENT_COUNTS
     if BALL_ENUM is not None:
