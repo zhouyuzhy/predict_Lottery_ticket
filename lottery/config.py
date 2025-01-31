@@ -7,7 +7,7 @@ import pandas as pd
 import os.path
 
 from lottery import CONVERT_ABSOLUTE_PATH
-
+# from lottery import CONVERT_ABSOLUTE_PATH
 URL = "https://datachart.500.com/ssq/history/"
 path = "newinc/history.php?start={}&end="
 
