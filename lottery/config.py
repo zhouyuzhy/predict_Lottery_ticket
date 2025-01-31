@@ -26,7 +26,7 @@ BALL_ENUM = None
 ATTRIBUTE_ISSUE = '期数'
 X_ATTRIBUTES = None
 Y_ATTRIBUTES = None
-
+# 最近的数据数量
 RECENT_COUNTS = [10, 30, 50, 100]
 
 
